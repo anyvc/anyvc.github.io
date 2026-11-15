@@ -19,7 +19,8 @@ npm run build   # must pass before any task is finished
 npm run preview # preview the build output
 ```
 
-`npm run build` prints `Missing pages directory: src/pages` until the first page exists. That is expected.
+`npm run build` writes the static site to `dist/`. The build warns that the `writing` collection is empty;
+that is expected until the first writing file exists.
 
 ## Fonts
 
@@ -57,9 +58,21 @@ After changing a colour, re-check contrast for every pair you touched (WCAG AA: 
 
 ## Add, edit or remove a project
 
-TODO: content collections and the project schema are not in the repository yet. Once
-`src/content/projects/*.md` exists, this section will describe adding one Markdown file per project, using
-`order` to sort and `draft: true` to hide it — no component changes required.
+One Markdown file per project in `src/content/projects/`; the schema is in `src/content.config.ts`.
+
+1. Copy an existing file, for example `src/content/projects/wazuh-soc-lab.md`.
+2. Fill in `title`, `summary` and `category` (`soc`, `pentest`, `cloud` or `research`). Add `year`
+   only when it is confirmed.
+3. `draft: true` hides the entry. Set `draft: false` only after every line has been checked.
+4. Set `order` to control position (lower shows first). Files without it sort after the rest.
+5. Add `repo` or `writeup` links only after setting `sanitized: true`, which also requires removing
+   passwords, tokens and internal IPs.
+6. Run `npm run dev` to preview and `npm run build` before finishing.
+
+To remove a project, delete its Markdown file. To reorder projects, change `order`.
+
+Writing entries work the same way in `src/content/writing/`, but `type` (`paper` or `writeup`) and
+`status` (`manuscript`, `preprint` or `published`) are required, and `status` must match reality.
 
 ## Deployment
 

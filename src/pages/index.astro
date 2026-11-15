@@ -1,0 +1,478 @@
+---
+import { getCollection } from "astro:content";
+import { existsSync } from "node:fs";
+import Base from "../layouts/Base.astro";
+import profile from "../data/profile.json";
+import coverage from "../data/coverage.json";
+
+const isPublic = (entry: { data: { draft: boolean } }) => entry.data.draft !== true;
+
+const projects = (await getCollection("projects"))
+  .filter(isPublic)
+  .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+
+const writing = (await getCollection("writing"))
+  .filter(isPublic)
+  .sort((a, b) => a.data.order - b.data.order || (b.data.year ?? 0) - (a.data.year ?? 0));
+
+const categoryLabels: Record<string, string> = {
+  soc: "SOC",
+  pentest: "Penetration testing",
+  cloud: "Cloud",
+  research: "Research",
+};
+
+const severityLabels: Record<string, string> = {
+  critical: "Critical",
+  high: "High",
+  medium: "Medium",
+  low: "Low",
+};
+
+const typeLabels: Record<string, string> = {
+  paper: "Paper",
+  writeup: "Write-up",
+};
+
+const statusLabels: Record<string, string> = {
+  manuscript: "Manuscript",
+  preprint: "Preprint",
+  published: "Published",
+};
+
+const coverageLabels: Record<string, string> = {
+  detected: "Detected",
+  "not-detected": "Not detected",
+  "not-applicable": "Not applicable",
+  "test-failed": "Test failed",
+};
+
+const coverageCounts = Object.keys(coverageLabels)
+  .map((status) => ({
+    label: coverageLabels[status],
+    count: coverage.filter((item) => item.status === status).length,
+  }))
+  .filter((entry) => entry.count > 0);
+
+const coverageSummary = coverageCounts
+  .map((entry) => `${entry.count} ${entry.label.toLowerCase()}`)
+  .join(", ");
+
+const emailIsTodo = profile.links.email.startsWith("TODO");
+const cvAvailable = existsSync(new URL("../../public/cv.pdf", import.meta.url));
+
+const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
+---
+
+<Base title={profile.name} description={description}>
+  <section class="hero" aria-labelledby="hero-name">
+    <h1 id="hero-name">{profile.name}</h1>
+    <p class="role">{profile.roleLine}</p>
+    <p class="status">{profile.status}</p>
+    <ul class="actions">
+      <li><a href={profile.links.github}>GitHub</a></li>
+      <li><a href={profile.links.linkedin}>LinkedIn</a></li>
+      {cvAvailable && <li><a href={profile.cv}>Download CV</a></li>}
+    </ul>
+  </section>
+
+  <section id="case-files" aria-labelledby="case-files-heading">
+    <h2 id="case-files-heading">Case files</h2>
+
+    {
+      projects.length === 0 ? (
+        <p class="todo">
+          TODO: no published case files yet. Add a file to <code>src/content/projects/</code> and set <code>draft: false</code> once the owner
+          has checked every line.
+        </p>
+      ) : (
+        <div class="cases">
+          {projects.map((project) => (
+            <article class="case">
+              <div class="case-heading">
+                <h3>{project.data.title}</h3>
+                <p class="case-category">{categoryLabels[project.data.category]}</p>
+              </div>
+
+              {project.data.summary && <p class="case-summary">{project.data.summary}</p>}
+
+              <dl class="meta">
+                {project.data.year && (
+                  <div>
+                    <dt>Year</dt>
+                    <dd>{project.data.year}</dd>
+                  </div>
+                )}
+                {project.data.severity && (
+                  <div>
+                    <dt>Severity</dt>
+                    <dd>{severityLabels[project.data.severity]}</dd>
+                  </div>
+                )}
+                {project.data.stack.length > 0 && (
+                  <div>
+                    <dt>Stack</dt>
+                    <dd>{project.data.stack.join(", ")}</dd>
+                  </div>
+                )}
+              </dl>
+
+              {project.data.outcomes.length > 0 && (
+                <ul class="outcomes">
+                  {project.data.outcomes.map((outcome) => (
+                    <li>{outcome}</li>
+                  ))}
+                </ul>
+              )}
+
+              {project.data.sanitized &&
+                (project.data.links.repo || project.data.links.writeup) && (
+                  <p class="case-links">
+                    {project.data.links.repo && (
+                      <a href={project.data.links.repo}>Repository</a>
+                    )}
+                    {project.data.links.writeup && (
+                      <a href={project.data.links.writeup}>Read the write-up</a>
+                    )}
+                  </p>
+                )}
+            </article>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section id="coverage" aria-labelledby="coverage-heading">
+    <h2 id="coverage-heading">Detection coverage</h2>
+    <p class="section-intro">
+      Results from the Wazuh lab. Detected, not detected, not applicable and test failed are
+      kept separate.
+    </p>
+
+    {
+      coverage.length === 0 ? (
+        <p class="todo">TODO: no coverage data yet. Add entries to <code>src/data/coverage.json</code>.</p>
+      ) : (
+        <>
+          <p class="coverage-summary">
+            {coverage.length} techniques tested: {coverageSummary}.
+          </p>
+          <dl class="coverage">
+            {coverage.map((item) => (
+              <div class="coverage-row">
+                <dt class="coverage-technique">
+                  <span class="coverage-id mono">{item.id}</span>
+                  <span>{item.name}</span>
+                </dt>
+                <dd class="coverage-result">
+                  <span class="coverage-state">
+                    {coverageLabels[item.status] ?? item.status}
+                  </span>
+                  {"note" in item && item.note && (
+                    <span class="coverage-note">{item.note}</span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )
+    }
+  </section>
+
+  <section id="writing" aria-labelledby="writing-heading">
+    <h2 id="writing-heading">Writing</h2>
+
+    {
+      writing.length === 0 ? (
+        <p class="todo">
+          TODO: no published writing yet. Add a file to <code>src/content/writing/</code>, then set <code>sanitized: true</code> after
+          checking for passwords, tokens and internal IPs. Set <code>draft: false</code> when it is ready.
+        </p>
+      ) : (
+        <ul class="writing">
+          {writing.map((entry) => (
+            <li class="writing-entry">
+              <h3>{entry.data.title}</h3>
+              <dl class="meta">
+                <div>
+                  <dt>Type</dt>
+                  <dd>{typeLabels[entry.data.type]}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{statusLabels[entry.data.status]}</dd>
+                </div>
+                {entry.data.year && (
+                  <div>
+                    <dt>Year</dt>
+                    <dd>{entry.data.year}</dd>
+                  </div>
+                )}
+              </dl>
+              {entry.data.authors.length > 0 && (
+                <p class="byline">{entry.data.authors.join(", ")}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  <section id="contact" aria-labelledby="contact-heading">
+    <h2 id="contact-heading">Contact</h2>
+
+    <dl class="contact">
+      <div>
+        <dt>Email</dt>
+        <dd>
+          {
+            emailIsTodo ? (
+              <span class="todo">{profile.links.email}</span>
+            ) : (
+              <span>{profile.links.email}</span>
+            )
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>GitHub</dt>
+        <dd><a href={profile.links.github}>{profile.links.github}</a></dd>
+      </div>
+      <div>
+        <dt>LinkedIn</dt>
+        <dd><a href={profile.links.linkedin}>{profile.links.linkedin}</a></dd>
+      </div>
+      <div>
+        <dt>CV</dt>
+        <dd>
+          {
+            cvAvailable ? (
+              <a href={profile.cv}>Download CV</a>
+            ) : (
+              <span class="todo">
+                TODO: add public/cv.pdf; the Download CV link stays hidden until it exists.
+              </span>
+            )
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+</Base>
+
+<style>
+  section {
+    padding-block: var(--space-8);
+    border-bottom: var(--hairline);
+  }
+
+  section:last-of-type {
+    border-bottom: 0;
+  }
+
+  .hero {
+    padding-block: var(--space-9) var(--space-8);
+  }
+
+  .role {
+    margin-top: var(--space-4);
+    font-size: var(--text-lg);
+    max-width: var(--measure);
+  }
+
+  .status {
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  h2 {
+    margin-bottom: var(--space-4);
+  }
+
+  .section-intro {
+    max-width: var(--measure);
+    color: var(--text-muted);
+    margin-bottom: var(--space-5);
+  }
+
+  .cases {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .case {
+    border-top: var(--hairline);
+    padding-top: var(--space-4);
+  }
+
+  .case-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-4);
+  }
+
+  .case-category {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .case-summary {
+    margin-top: var(--space-2);
+    max-width: var(--measure);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .meta div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .meta dt {
+    color: var(--text-muted);
+  }
+
+  .outcomes {
+    margin-top: var(--space-3);
+    max-width: var(--measure);
+    font-size: var(--text-sm);
+  }
+
+  .outcomes li + li {
+    margin-top: var(--space-1);
+  }
+
+  .case-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .coverage-summary {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+  }
+
+  .coverage {
+    border-top: var(--hairline);
+  }
+
+  .coverage-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    gap: var(--space-1) var(--space-5);
+    padding-block: var(--space-3);
+    border-bottom: var(--hairline);
+  }
+
+  .coverage-technique {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .coverage-id {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+
+  .coverage-result {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-4);
+  }
+
+  .coverage-state {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+  }
+
+  .coverage-note {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .writing {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .writing-entry {
+    border-top: var(--hairline);
+    padding-top: var(--space-4);
+  }
+
+  .byline {
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .contact {
+    display: grid;
+    gap: var(--space-4);
+    max-width: var(--measure);
+  }
+
+  .contact div {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    align-items: baseline;
+  }
+
+  .contact dt {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .contact dd {
+    overflow-wrap: anywhere;
+  }
+
+  .contact dd .todo {
+    display: inline-block;
+  }
+
+  @media (max-width: 44rem) {
+    .coverage-row {
+      grid-template-columns: 1fr;
+    }
+
+    .coverage-result {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .contact div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

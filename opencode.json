@@ -10,7 +10,14 @@
     },
     "glob": "allow",
     "grep": "allow",
-    "edit": "ask",
+    "edit": {
+      "*": "ask",
+      "opencode.json": "deny",
+      "AGENTS.md": "deny",
+      ".npmrc": "deny",
+      ".github/*": "deny",
+      ".agents/*": "deny"
+    },
     "external_directory": "ask",
     "webfetch": "deny",
     "websearch": "deny",
