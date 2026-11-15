@@ -50,11 +50,24 @@ contain raw hex values.
 - Dark palette: `--bg`, `--surface`, `--bone`, `--ash`, `--blood`, `--maroon`. Body text is always
   `--text` on `--bg`. `--blood` is only 4.06:1 against the background, so it is for accents, markers and
   large type, never paragraphs.
-- Clean view: override block keyed on `:root[data-view="clean"]` sets a light palette and zeroes the
-  effect tokens. Both views read the same content.
-- Motion: `prefers-reduced-motion` sets the motion tokens to `0ms`.
+- Clean view: override block keyed on `:root[data-theme="clean"]` sets a light palette, zeroes the
+  effect tokens and hides the eye. The header toggle stores `watch` or `clean` under the `theme` key
+  in `localStorage` and falls back to the current page only if storage is blocked. Both views read the
+  same content.
+- Section edge: the `--dither-*` tokens hold the one dithered rule used at every section boundary.
+  Clean view and print swap the mask for a plain 1px rule.
+- Motion: `prefers-reduced-motion` sets the motion tokens to `0ms` and turns the hero grain off.
 
 After changing a colour, re-check contrast for every pair you touched (WCAG AA: 4.5:1 for body text).
+
+## Pages
+
+- `/` — the home page. Every section reads from `src/data/` and `src/content/`.
+- `/cv` — print-friendly CV. It shows only fields from `src/data/profile.json`, so edit that file to
+  change the CV page. Printing switches to black on white and hides the site navigation.
+- `404.html` — the not-found page, built from `src/pages/404.astro` and marked `noindex`.
+- `public/favicon.svg` is drawn in code. Its colours mirror the palette in `tokens.css`, because an
+  SVG favicon cannot read CSS custom properties.
 
 ## Add, edit or remove a project
 

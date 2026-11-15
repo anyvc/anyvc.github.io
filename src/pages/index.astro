@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { existsSync } from "node:fs";
 import Base from "../layouts/Base.astro";
 import Eye from "../components/Eye.astro";
+import Grain from "../components/Grain.astro";
 import profile from "../data/profile.json";
 import coverage from "../data/coverage.json";
 
@@ -59,6 +60,12 @@ const coverageSummary = coverageCounts
   .map((entry) => `${entry.count} ${entry.label.toLowerCase()}`)
   .join(", ");
 
+/* One static log line, built only from detected results and their real notes. */
+const logLine = coverage
+  .filter((item) => item.status === "detected")
+  .map((item) => `${item.id} detected${"note" in item && item.note ? `, ${item.note}` : ""}`)
+  .join(" · ");
+
 const emailIsTodo = profile.links.email.startsWith("TODO");
 const cvAvailable = existsSync(new URL("../../public/cv.pdf", import.meta.url));
 
@@ -66,11 +73,13 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
 ---
 
 <Base title={profile.name} description={description}>
-  <section class="hero" aria-labelledby="hero-name">
+  <section class="hero rule-dither" aria-labelledby="hero-name">
+    <Grain />
     <Eye />
     <div class="hero-copy">
       <h1 id="hero-name">{profile.name}</h1>
       <p class="role">{profile.roleLine}</p>
+      {logLine && <p class="log-ticker mono">{logLine}</p>}
       <p class="status">{profile.status}</p>
       <ul class="actions">
         <li><a href={profile.links.github}>GitHub</a></li>
@@ -80,7 +89,7 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     </div>
   </section>
 
-  <section id="case-files" aria-labelledby="case-files-heading">
+  <section id="case-files" class="rule-dither" aria-labelledby="case-files-heading">
     <h2 id="case-files-heading">Case files</h2>
 
     {
@@ -147,7 +156,7 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     }
   </section>
 
-  <section id="coverage" aria-labelledby="coverage-heading">
+  <section id="coverage" class="rule-dither" aria-labelledby="coverage-heading">
     <h2 id="coverage-heading">Detection coverage</h2>
     <p class="section-intro">
       Results from the Wazuh lab. Detected, not detected, not applicable and test failed are
@@ -170,7 +179,7 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
                   <span>{item.name}</span>
                 </dt>
                 <dd class="coverage-result">
-                  <span class="coverage-state">
+                  <span class="coverage-state" data-status={item.status}>
                     {coverageLabels[item.status] ?? item.status}
                   </span>
                   {"note" in item && item.note && (
@@ -185,7 +194,7 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     }
   </section>
 
-  <section id="writing" aria-labelledby="writing-heading">
+  <section id="writing" class="rule-dither" aria-labelledby="writing-heading">
     <h2 id="writing-heading">Writing</h2>
 
     {
@@ -242,12 +251,11 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
         </dd>
       </div>
       <div>
-        <dt>GitHub</dt>
-        <dd><a href={profile.links.github}>{profile.links.github}</a></dd>
-      </div>
-      <div>
-        <dt>LinkedIn</dt>
-        <dd><a href={profile.links.linkedin}>{profile.links.linkedin}</a></dd>
+        <dt>Links</dt>
+        <dd class="contact-links">
+          <a href={profile.links.github}>GitHub</a>
+          <a href={profile.links.linkedin}>LinkedIn</a>
+        </dd>
       </div>
       <div>
         <dt>CV</dt>
@@ -270,19 +278,15 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
 <style>
   section {
     padding-block: var(--space-8);
-    border-bottom: var(--hairline);
-  }
-
-  section:last-of-type {
-    border-bottom: 0;
   }
 
   .hero {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-5) var(--space-7);
-    padding-block: var(--space-9) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+    padding-block: var(--space-8);
+    isolation: isolate;
   }
 
   .hero-copy {
@@ -293,6 +297,18 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     margin-top: var(--space-4);
     font-size: var(--text-lg);
     max-width: var(--measure);
+  }
+
+  /* Real detection log, one static line. Never animated. */
+  .log-ticker {
+    margin-top: var(--space-2);
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .status {
@@ -425,6 +441,23 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     font-size: var(--text-sm);
   }
 
+  /* The written label is always present; colour only reinforces it. */
+  .coverage-state[data-status="detected"] {
+    color: var(--state-detected);
+  }
+
+  .coverage-state[data-status="not-detected"] {
+    color: var(--state-gap);
+  }
+
+  .coverage-state[data-status="test-failed"] {
+    color: var(--state-failed);
+  }
+
+  .coverage-state[data-status="not-applicable"] {
+    color: var(--state-na);
+  }
+
   .coverage-note {
     color: var(--text-muted);
     font-size: var(--text-sm);
@@ -472,14 +505,13 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
     display: inline-block;
   }
 
-  @media (max-width: 44rem) {
-    /* Stacked eye stays small so the name and role line keep the first screen. */
-    .hero {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-4);
-      padding-block: var(--space-6) var(--space-7);
-    }
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
 
+  @media (max-width: 44rem) {
     .coverage-row {
       grid-template-columns: 1fr;
     }

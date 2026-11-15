@@ -2,7 +2,7 @@
 title: "Zero Trust lab"
 summary: "Keycloak as the identity provider, OpenZiti for per-service access and a deny-by-default firewall."
 category: cloud
-draft: true
+draft: false
 sanitized: false
 tags: ["zero-trust", "identity"]
 stack: ["Keycloak", "OpenZiti", "UFW"]
