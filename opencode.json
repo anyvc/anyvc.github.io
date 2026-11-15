@@ -1,25 +1,44 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "permissions": [
-    { "action": "*", "resource": "*", "effect": "ask" },
-    { "action": "read", "resource": "*", "effect": "allow" },
-    { "action": "glob", "resource": "*", "effect": "allow" },
-    { "action": "grep", "resource": "*", "effect": "allow" },
-    { "action": "read", "resource": "*.env", "effect": "deny" },
-    { "action": "read", "resource": "*.env.*", "effect": "deny" },
-    { "action": "read", "resource": "*.env.example", "effect": "allow" },
-    { "action": "external_directory", "resource": "*", "effect": "ask" },
-    { "action": "shell", "resource": "*", "effect": "ask" },
-    { "action": "shell", "resource": "git status *", "effect": "allow" },
-    { "action": "shell", "resource": "git diff *", "effect": "allow" },
-    { "action": "shell", "resource": "git log *", "effect": "allow" },
-    { "action": "shell", "resource": "rm *", "effect": "deny" },
-    { "action": "shell", "resource": "Remove-Item *", "effect": "deny" },
-    { "action": "shell", "resource": "curl *", "effect": "deny" },
-    { "action": "shell", "resource": "wget *", "effect": "deny" },
-    { "action": "shell", "resource": "git push *", "effect": "deny" },
-    { "action": "skill", "resource": "*", "effect": "deny" },
-    { "action": "skill", "resource": "frontend-design", "effect": "allow" },
-    { "action": "skill", "resource": "astro-framework", "effect": "allow" }
-  ]
+  "permission": {
+    "*": "ask",
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
+    "glob": "allow",
+    "grep": "allow",
+    "edit": "ask",
+    "external_directory": "ask",
+    "webfetch": "deny",
+    "websearch": "deny",
+    "skill": {
+      "*": "deny",
+      "frontend-design": "allow",
+      "astro-framework": "allow"
+    },
+    "bash": {
+      "*": "ask",
+      "git status": "allow",
+      "git status *": "allow",
+      "git diff": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "rm *": "deny",
+      "del *": "deny",
+      "rmdir *": "deny",
+      "Remove-Item *": "deny",
+      "curl *": "deny",
+      "wget *": "deny",
+      "Invoke-WebRequest *": "deny",
+      "Invoke-RestMethod *": "deny",
+      "iwr *": "deny",
+      "irm *": "deny",
+      "npx *": "deny",
+      "git push *": "deny",
+      "git remote *": "deny"
+    }
+  }
 }
