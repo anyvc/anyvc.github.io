@@ -79,7 +79,7 @@
 }
 
 /* Clean view: same content, minimal palette, no effects. */
-:root[data-view="clean"] {
+:root[data-theme="clean"] {
   color-scheme: light;
 
   --bg: #f7f5f2;
@@ -92,6 +92,17 @@
   --grain-opacity: 0;
   --eye-glow: 0;
   --scanline-opacity: 0;
+  --motion-fast: 0ms;
+  --motion-slow: 0ms;
+}
+
+/* The eye is the one decorative effect: clean view drops it and its column. */
+:root[data-theme="clean"] .eye {
+  display: none;
+}
+
+:root[data-theme="clean"] .hero {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* Contrast ratios, measured against these exact values:

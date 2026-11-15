@@ -21,6 +21,16 @@ const canonical = Astro.site
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (() => {
+        try {
+          document.documentElement.dataset.theme =
+            localStorage.getItem("theme") === "clean" ? "clean" : "watch";
+        } catch {
+          document.documentElement.dataset.theme = "watch";
+        }
+      })();
+    </script>
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -38,11 +48,40 @@ const canonical = Astro.site
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
+      <button class="clean-toggle" type="button" aria-pressed="false" data-clean-toggle>
+        Clean view
+      </button>
     </header>
 
     <main id="main">
       <slot />
     </main>
+
+    <script>
+      const toggle = document.querySelector<HTMLButtonElement>("[data-clean-toggle]");
+
+      if (toggle) {
+        const root = document.documentElement;
+
+        const sync = () => {
+          toggle.setAttribute("aria-pressed", String(root.dataset.theme === "clean"));
+        };
+
+        sync();
+
+        toggle.addEventListener("click", () => {
+          const next = root.dataset.theme === "clean" ? "watch" : "clean";
+          root.dataset.theme = next;
+          sync();
+
+          try {
+            localStorage.setItem("theme", next);
+          } catch {
+            // Storage can be blocked; the current page still switches.
+          }
+        });
+      }
+    </script>
   </body>
 </html>
 
@@ -182,6 +221,32 @@ const canonical = Astro.site
     color: var(--text);
   }
 
+  .clean-toggle {
+    margin-inline-start: auto;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: var(--hairline);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .clean-toggle:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  .clean-toggle[aria-pressed="true"],
+  :root[data-theme="clean"] .clean-toggle {
+    color: var(--text);
+    border-color: var(--blood);
+    background: var(--surface);
+  }
+
   main {
     flex: 1;
     width: 100%;
@@ -207,6 +272,10 @@ const canonical = Astro.site
     .site-header {
       align-items: flex-start;
       flex-direction: column;
+    }
+
+    .clean-toggle {
+      margin-inline-start: 0;
     }
   }
 </style>
