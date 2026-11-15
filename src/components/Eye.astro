@@ -1,0 +1,189 @@
+---
+// Decorative hero eye, drawn in code. The script only moves the pupil.
+// Size, radii and colours come from src/styles/tokens.css.
+---
+
+<svg
+  class="eye"
+  viewBox="0 0 160 96"
+  aria-hidden="true"
+  focusable="false"
+  data-eye
+>
+  <g class="eye-lid">
+    <path
+      class="eye-sclera"
+      d="M 10 48 C 42 12 118 12 150 48 C 118 84 42 84 10 48 Z"
+    />
+    <circle class="eye-halo" cx="80" cy="48" r="22" />
+    <circle class="eye-iris" cx="80" cy="48" r="22" />
+    <circle class="eye-pupil" cx="80" cy="48" r="8" data-eye-pupil />
+  </g>
+</svg>
+
+<script>
+  const svg = document.querySelector<SVGSVGElement>("[data-eye]");
+  const pupil = svg?.querySelector<SVGElement>("[data-eye-pupil]");
+  const hero = svg?.closest<HTMLElement>(".hero");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (svg && pupil && hero) {
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const radius =
+      Number.parseFloat(getComputedStyle(svg).getPropertyValue("--eye-gaze-radius")) || 5;
+
+    let still = reduce.matches;
+    let targetX = 0;
+    let targetY = 0;
+    let x = 0;
+    let y = 0;
+    let frame = 0;
+
+    const place = () => {
+      pupil.setAttribute("transform", `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+    };
+
+    const tick = (now: number) => {
+      frame = 0;
+      if (still || document.hidden) return;
+
+      // Touch screens: a slow, continuous drift instead of pointer tracking.
+      if (!finePointer) {
+        targetX = Math.sin(now / 1900) * radius * 0.8;
+        targetY = Math.cos(now / 2600) * radius * 0.55;
+      }
+
+      x += (targetX - x) * 0.14;
+      y += (targetY - y) * 0.14;
+      place();
+
+      if (!finePointer || Math.abs(targetX - x) > 0.02 || Math.abs(targetY - y) > 0.02) {
+        frame = requestAnimationFrame(tick);
+      } else {
+        x = targetX;
+        y = targetY;
+        place();
+      }
+    };
+
+    const wake = () => {
+      if (!still && !document.hidden && !frame) frame = requestAnimationFrame(tick);
+    };
+
+    if (finePointer) {
+      hero.addEventListener(
+        "pointermove",
+        (event) => {
+          const box = svg.getBoundingClientRect();
+          const dx = event.clientX - (box.left + box.width / 2);
+          const dy = event.clientY - (box.top + box.height / 2);
+          const distance = Math.hypot(dx, dy);
+
+          if (distance < 1) {
+            targetX = 0;
+            targetY = 0;
+          } else {
+            const pull = Math.min(distance / 200, 1) * radius;
+            targetX = (dx / distance) * pull;
+            targetY = (dy / distance) * pull * 0.8;
+          }
+          wake();
+        },
+        { passive: true },
+      );
+
+      hero.addEventListener(
+        "pointerleave",
+        () => {
+          targetX = 0;
+          targetY = 0;
+          wake();
+        },
+        { passive: true },
+      );
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (frame) cancelAnimationFrame(frame);
+        frame = 0;
+      } else {
+        wake();
+      }
+    });
+
+    reduce.addEventListener("change", (event) => {
+      still = event.matches;
+      if (still) {
+        if (frame) cancelAnimationFrame(frame);
+        frame = 0;
+        x = 0;
+        y = 0;
+        targetX = 0;
+        targetY = 0;
+        place();
+      } else {
+        wake();
+      }
+    });
+
+    wake();
+  }
+</script>
+
+<style>
+  .eye {
+    display: block;
+    width: var(--eye-size);
+    height: auto;
+    aspect-ratio: 160 / 96;
+    overflow: hidden;
+  }
+
+  .eye-lid {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: eye-open var(--motion-slow) cubic-bezier(0.2, 0.7, 0.3, 1) 120ms both;
+  }
+
+  .eye-sclera {
+    fill: var(--maroon);
+    stroke: var(--blood);
+    stroke-width: var(--eye-outline);
+  }
+
+  /* Soft bloom behind the iris; intensity is a token so it can be switched off. */
+  .eye-halo {
+    fill: var(--blood);
+    opacity: var(--eye-glow);
+    filter: blur(var(--eye-glow-blur));
+  }
+
+  .eye-iris {
+    r: var(--eye-iris-radius);
+    fill: var(--blood);
+  }
+
+  .eye-pupil {
+    r: var(--eye-pupil-radius);
+    fill: var(--bg);
+  }
+
+  @keyframes eye-open {
+    0% {
+      transform: scaleY(0.04);
+    }
+    70% {
+      transform: scaleY(1.04);
+    }
+    100% {
+      transform: scaleY(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eye-lid {
+      animation: none;
+    }
+  }
+</style>

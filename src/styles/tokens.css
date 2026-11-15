@@ -62,6 +62,14 @@
   --gutter: clamp(1.25rem, 5vw, 4rem);
   --radius: 2px;
 
+  /* Hero eye (src/components/Eye.astro). Geometry values are SVG user units. */
+  --eye-size: clamp(3.25rem, 8vw, 6rem);
+  --eye-iris-radius: 22px;
+  --eye-pupil-radius: 8px;
+  --eye-gaze-radius: 5px; /* how far the pupil may travel; stays inside the iris */
+  --eye-outline: 1.5px;
+  --eye-glow-blur: 2.5px;
+
   /* Effect intensity. Zero here means "off", not "subtle". */
   --grain-opacity: 0.06;
   --eye-glow: 0.35;

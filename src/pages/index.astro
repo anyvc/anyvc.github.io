@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import { existsSync } from "node:fs";
 import Base from "../layouts/Base.astro";
+import Eye from "../components/Eye.astro";
 import profile from "../data/profile.json";
 import coverage from "../data/coverage.json";
 
@@ -66,14 +67,17 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
 
 <Base title={profile.name} description={description}>
   <section class="hero" aria-labelledby="hero-name">
-    <h1 id="hero-name">{profile.name}</h1>
-    <p class="role">{profile.roleLine}</p>
-    <p class="status">{profile.status}</p>
-    <ul class="actions">
-      <li><a href={profile.links.github}>GitHub</a></li>
-      <li><a href={profile.links.linkedin}>LinkedIn</a></li>
-      {cvAvailable && <li><a href={profile.cv}>Download CV</a></li>}
-    </ul>
+    <Eye />
+    <div class="hero-copy">
+      <h1 id="hero-name">{profile.name}</h1>
+      <p class="role">{profile.roleLine}</p>
+      <p class="status">{profile.status}</p>
+      <ul class="actions">
+        <li><a href={profile.links.github}>GitHub</a></li>
+        <li><a href={profile.links.linkedin}>LinkedIn</a></li>
+        {cvAvailable && <li><a href={profile.cv}>Download CV</a></li>}
+      </ul>
+    </div>
   </section>
 
   <section id="case-files" aria-labelledby="case-files-heading">
@@ -274,7 +278,15 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
   }
 
   .hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-5) var(--space-7);
     padding-block: var(--space-9) var(--space-8);
+  }
+
+  .hero-copy {
+    min-width: 0;
   }
 
   .role {
@@ -461,6 +473,13 @@ const description = `${profile.name} — ${profile.roleLine} ${profile.status}`;
   }
 
   @media (max-width: 44rem) {
+    /* Stacked eye stays small so the name and role line keep the first screen. */
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+      padding-block: var(--space-6) var(--space-7);
+    }
+
     .coverage-row {
       grid-template-columns: 1fr;
     }
