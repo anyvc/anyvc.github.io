@@ -1,0 +1,86 @@
+# anyvc.github.io
+
+Personal cybersecurity portfolio for a student targeting SOC analyst internships, later cloud security.
+Static Astro site, deployed to GitHub Pages. Content is data, design is code: text and links live in
+`src/content/` and `src/data/`, while colours, type and spacing live in `src/styles/tokens.css`.
+
+## Requirements
+
+- Node `26.13.1` — the exact version in `.node-version`, which CI also reads.
+- npm `>=9.6.5` (Astro's minimum).
+- Astro `7.4.7`, pinned exactly in `package.json`. Keep the lockfile committed.
+
+## Commands
+
+```sh
+npm ci          # install from the lockfile
+npm run dev     # local preview
+npm run build   # must pass before any task is finished
+npm run preview # preview the build output
+```
+
+`npm run build` prints `Missing pages directory: src/pages` until the first page exists. That is expected.
+
+## Fonts
+
+Two families are self-hosted: **Syne** (display) and **Newsreader** (body). No italics, no extra families.
+
+- Source: unmodified variable TTFs from the Google Fonts repository,
+  `https://github.com/google/fonts/tree/main/ofl/syne` and `.../ofl/newsreader`.
+- Files were not subsetted or converted. WOFF2 copies from CDN endpoints are subsets, so they are not used.
+- **Renamed:** the upstream names contain brackets (`Syne[wght].ttf`, `Newsreader[opsz,wght].ttf`).
+  Brackets in URLs are unreliable, so the files are `Syne-Variable.ttf` and `Newsreader-Variable.ttf`.
+  Only the filename changed; file contents are byte-identical to upstream.
+
+| File | Bytes | SHA-256 |
+|---|---|---|
+| `public/fonts/syne/Syne-Variable.ttf` | 146980 | `ce5ac77142a65cab2248a1a2ebb740b1d4d9c20b52488877d3ff664d1356104a` |
+| `public/fonts/newsreader/Newsreader-Variable.ttf` | 451664 | `8a08d13f8a6c0d51be379a60af84f945f65369a67e509ee3c3bdcc421254d7c1` |
+
+Both are licensed under the SIL Open Font License 1.1. `OFL.txt` sits beside each font file. Neither
+family declares a Reserved Font Name. Declarations are in `src/styles/fonts.css`; do not add a third
+family without asking, and do not re-subset the files.
+
+## Change the theme
+
+All colours, type sizes, spacing and effect intensity come from `src/styles/tokens.css`. Components never
+contain raw hex values.
+
+- Dark palette: `--bg`, `--surface`, `--bone`, `--ash`, `--blood`, `--maroon`. Body text is always
+  `--text` on `--bg`. `--blood` is only 4.06:1 against the background, so it is for accents, markers and
+  large type, never paragraphs.
+- Clean view: override block keyed on `:root[data-view="clean"]` sets a light palette and zeroes the
+  effect tokens. Both views read the same content.
+- Motion: `prefers-reduced-motion` sets the motion tokens to `0ms`.
+
+After changing a colour, re-check contrast for every pair you touched (WCAG AA: 4.5:1 for body text).
+
+## Add, edit or remove a project
+
+TODO: content collections and the project schema are not in the repository yet. Once
+`src/content/projects/*.md` exists, this section will describe adding one Markdown file per project, using
+`order` to sort and `draft: true` to hide it — no component changes required.
+
+## Deployment
+
+Push to `main` triggers `.github/workflows/deploy.yml`: install with the lockfile, build on the Node version
+from `.node-version`, then publish `dist/` to GitHub Pages. Nothing is served by a server; no adapter, SSR,
+sessions, actions or i18n routing.
+
+## Dependencies
+
+- Astro is the only direct dependency. Do not add another without asking first.
+- `.npmrc` sets `ignore-scripts=true`, so dependency install scripts never run automatically — locally or
+  in CI. `npm run <script>` is unaffected. If a future package needs a postinstall build step, the install
+  will silently skip it and the build will fail; allow that one package deliberately instead of removing
+  the setting.
+- Dependabot checks npm and GitHub Actions weekly with `cooldown: default-days: 14`. Cooldown applies to
+  version updates only; security updates still open immediately.
+- `npm audit` is expected to report 0 vulnerabilities.
+
+## Before publishing content
+
+Never invent facts, metrics, dates, certifications or links; leave a visible `TODO:` instead. Paper status
+must match the content file. Write-ups are only shown when the file has `sanitized: true` — remove
+passwords, tokens, internal IPs, phone numbers and student IDs first. Use job titles exactly as confirmed in
+`src/data/profile.json`.

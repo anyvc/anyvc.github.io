@@ -1,0 +1,101 @@
+/* Design tokens for "The Watcher".
+   This is the only file where raw colour values may appear (see AGENTS.md).
+   Components consume the roles below; they never hard-code hex values. */
+
+:root {
+  color-scheme: dark;
+
+  /* Palette (DESIGN-BRIEF.md) */
+  --bg: #070707;
+  --surface: #120a0a;
+  --blood: #e10600;
+  --maroon: #3a0000;
+  --bone: #ede6e0;
+  --ash: #8a8a8a;
+
+  /* Roles */
+  --text: var(--bone);
+  --text-muted: var(--ash);
+  --rule: var(--maroon);
+  --focus: var(--bone);
+  --selection: var(--maroon);
+  --hairline: 1px solid var(--maroon);
+
+  /* Detection coverage states. Colour is never the only signal:
+     every state also gets a written label and a distinct marker shape. */
+  --state-detected: var(--bone);
+  --state-gap: var(--ash);
+  --state-na: var(--ash);
+  --state-failed: var(--blood); /* 4.06:1 on --bg: markers and large text only */
+
+  /* Type */
+  --font-display: "Syne", sans-serif;
+  --font-text: "Newsreader", Georgia, serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: clamp(2.75rem, 7vw, 4.75rem);
+  --leading-display: 1.08;
+  --leading-text: 1.6; /* serif body: slightly looser than a sans */
+  --measure: 66ch; /* under 80 characters */
+  --tracking-display: -0.01em;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* Layout */
+  --page-max: 72rem;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --radius: 2px;
+
+  /* Effect intensity. Zero here means "off", not "subtle". */
+  --grain-opacity: 0.06;
+  --eye-glow: 0.35;
+  --scanline-opacity: 0;
+  --motion-fast: 140ms;
+  --motion-slow: 900ms;
+}
+
+/* Clean view: same content, minimal palette, no effects. */
+:root[data-view="clean"] {
+  color-scheme: light;
+
+  --bg: #f7f5f2;
+  --surface: #ffffff;
+  --blood: #a80000;
+  --maroon: #d9d3cc;
+  --bone: #141414;
+  --ash: #55524e;
+
+  --grain-opacity: 0;
+  --eye-glow: 0;
+  --scanline-opacity: 0;
+}
+
+/* Contrast ratios, measured against these exact values:
+   Dark  — bone/bg 16.30, bone/surface 15.83, ash/bg 5.84, ash/surface 5.67,
+           blood/bg 4.06 (AA large text only: >= 24px, or >= 18.66px bold).
+   Light — bone/bg 16.93, bone/surface 18.42, ash/bg 7.14, blood/bg 7.24.
+   Body copy is always --text on --bg. --blood is for accents, markers and
+   large type, never for paragraphs. */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-slow: 0ms;
+  }
+}
