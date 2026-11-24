@@ -1,0 +1,111 @@
+{
+  "siteUrl": "https://anyvc.github.io",
+  "name": "Rayn Hanash Fasya",
+  "title": "Rayn Hanash Fasya – The Watcher",
+  "description": "Rayn Hanash Fasya builds security labs, breaks them, and documents what they miss.",
+  "ogImage": "/og.png",
+  "ogImageAlt": "Rayn Hanash Fasya. I build security labs, break them, and document what they miss. A red eye on a dark background.",
+  "cvPath": "/CV_Rayn_Hanash_Fasya.pdf",
+  "portrait": null,
+  "nav": [
+    {
+      "label": "Case files",
+      "href": "#case"
+    },
+    {
+      "label": "Coverage",
+      "href": "#coverage"
+    },
+    {
+      "label": "About",
+      "href": "#about"
+    },
+    {
+      "label": "Experience",
+      "href": "#experience"
+    },
+    {
+      "label": "Contact",
+      "href": "#contact"
+    }
+  ],
+  "modeLabels": {
+    "toClean": "Recruiter / Clean View",
+    "toWatcher": "Watcher Mode"
+  },
+  "hero": {
+    "badge": "Open to labs, student orgs, research and internships",
+    "kicker": "THE WATCHER",
+    "headline": "I build security labs, break them, and document what they miss.",
+    "sub": "Second-year Information Systems student at Telkom University. Wazuh, Azure and attack labs, plus one research paper on AI coding-agent security.",
+    "buttons": [
+      {
+        "label": "See what I've built",
+        "href": "#case",
+        "primary": true
+      },
+      {
+        "label": "Work with me",
+        "href": "#contact"
+      },
+      {
+        "label": "CV",
+        "href": "/CV_Rayn_Hanash_Fasya.pdf",
+        "download": true
+      }
+    ]
+  },
+  "marquees": [
+    "STILL WATCHING 4625 T1110",
+    "WHAT THEY MISS"
+  ],
+  "caseIntro": {
+    "text": "7 lab write-ups and 1 research paper, from MBC Lab 2026 Cybersecurity assignments.",
+    "withheld": [
+      {
+        "label": "credentials",
+        "width": 6
+      },
+      {
+        "label": "flags",
+        "width": 4
+      },
+      {
+        "label": "lab IPs",
+        "width": 5
+      }
+    ]
+  },
+  "about": {
+    "text": [
+      "Second-year Information Systems student at Telkom University. I built a hybrid Wazuh SOC lab and wrote down what the default rules missed. I also write up pentest labs and co-authored a paper on AI coding-agent security."
+    ]
+  },
+  "contact": {
+    "title": "Let's build something.",
+    "text": "Running a lab project, student org or research group? I can help build test environments, write up lab results, or contribute to security projects.",
+    "links": [
+      {
+        "label": "Email",
+        "text": "anyvc.work@gmail.com",
+        "href": "mailto:anyvc.work@gmail.com"
+      },
+      {
+        "label": "GitHub",
+        "text": "github.com/anyvc",
+        "href": "https://github.com/anyvc"
+      },
+      {
+        "label": "LinkedIn",
+        "text": "linkedin.com/in/hanashrayn",
+        "href": "https://linkedin.com/in/hanashrayn"
+      },
+      {
+        "label": "CV",
+        "text": "Download CV (PDF)",
+        "href": "/CV_Rayn_Hanash_Fasya.pdf",
+        "download": true
+      }
+    ]
+  }
+}

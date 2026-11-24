@@ -1,0 +1,16 @@
+---
+import site from '../../data/site.json';
+---
+<button type="button" class="mode-toggle w-noprint" data-mode-toggle aria-label="Switch view mode">
+  <span class="w-only-watcher">{site.modeLabels.toClean}</span>
+  <span class="w-only-clean">{site.modeLabels.toWatcher}</span>
+</button>
+<style>
+  .mode-toggle {
+    font: 500 .75rem/1 var(--font-mono); padding: .6rem .8rem; cursor: pointer;
+    color: var(--color-text); background: transparent;
+    border: 1px solid var(--color-border); border-radius: var(--shape-radius);
+  }
+  .mode-toggle:hover { border-color: var(--color-accent-text); color: var(--color-accent-text); }
+  :global(html:not(.js)) .mode-toggle { display: none; } /* no JS: nothing to toggle */
+</style>
