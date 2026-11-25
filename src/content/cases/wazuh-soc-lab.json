@@ -1,0 +1,111 @@
+{
+  "id": "wazuh-soc-lab",
+  "order": 1,
+  "cat": "SOC",
+  "group": "Defense",
+  "title": "Wazuh SOC lab",
+  "summary": "A self-built Wazuh SOC on Azure and VMware, tested with Atomic Red Team to see what default rules miss.",
+  "tags": [
+    "Wazuh",
+    "Azure",
+    "Windows 10",
+    "Kali Linux",
+    "VMware"
+  ],
+  "meta": "LAS Week 5 · about 6 hours",
+  "card": {
+    "n": "13",
+    "unit": "alerts",
+    "caption": "from 8 SMB brute-force attempts"
+  },
+  "kpis": [
+    {
+      "n": "13",
+      "label": "alerts from 8 attempts, rule 60204"
+    },
+    {
+      "n": "1 of 8",
+      "label": "ATT&CK tests detected"
+    },
+    {
+      "n": "3",
+      "label": "tests that failed to run, kept separate"
+    }
+  ],
+  "sections": {
+    "goal": [
+      "Build a self-hosted Wazuh SOC and measure which attacks its default rules catch and which they miss."
+    ],
+    "setup": [
+      "Wazuh 4.14 all-in-one (manager, indexer, dashboard) on an Azure Ubuntu 24.04 VM with 2 vCPU and 8 GB RAM. The manager stack lives in the cloud because the local machine (12 GB RAM) could not host everything.",
+      "A Windows 10 Home victim running the Wazuh agent and a Kali Linux attacker, both on an isolated NAT network in VMware Workstation.",
+      "Agent enrollment needed TCP 1514 and 1515 opened in the Azure network security group. Windows 10 was chosen because Atomic Red Team covers far more techniques there.",
+      "Manager address: {{redact:11}}. Agent enrollment key: {{redact:16}}."
+    ],
+    "did": [
+      "Ran an Nmap service scan and an SMB brute force with NetExec (8 candidate passwords) from Kali.",
+      "Emulated six more ATT&CK techniques with Atomic Red Team and checked the dashboard within 15 minutes of each test.",
+      "Wrote an active-response script that reads the Wazuh alert, extracts the attacker address and adds a Windows Firewall block rule.",
+      "Added a local rule (100200) chained to rule 60204. Setting the source address at rule level was rejected by the analysis daemon, so the script parses the alert JSON instead."
+    ],
+    "results": [
+      "The SMB brute force was detected: 8 failed logins produced 13 authentication-failure alerts, correlated into rule 60204 (level 10) and mapped to T1110.",
+      "Coverage: 1 of 8 techniques detected, 3 not detected, 3 tests failed to run, 1 not applicable.",
+      "The block rule worked: 100% ICMP packet loss from the attacker (38 packets sent, none received).",
+      "Default Wazuh caught the SMB brute force (Event ID 4625 → Rule 60204), but missed the Nmap scan because Windows Firewall logging was off and Sysmon was not installed."
+    ],
+    "failed": [
+      "The Nmap scan went unseen: a HIDS reads OS logs, and Windows Firewall logging was off.",
+      "T1082 System Information Discovery and T1547.001 Registry Run Key were not detected by the default ruleset.",
+      "T1059.001, T1003.001 and T1070.001 never ran (missing external payload, ProcDump unavailable, technique absent from the atomics version used). They are kept apart from true negatives. T1136.001 had no Windows tests in the library.",
+      "The manager could not be confirmed to trigger the final script automatically in the time available, so the block was shown as a semi-automatic step."
+    ],
+    "next": [
+      "Add Sysmon for process creation, registry and network telemetry, the gap the default rules leave.",
+      "Turn Windows Firewall logging on and repeat the network scan test.",
+      "Rerun the three failed tests with their dependencies installed."
+    ]
+  },
+  "docs": [
+    {
+      "label": "Active response script",
+      "href": "https://github.com/anyvc"
+    }
+  ],
+  "artifact": {
+    "type": "Wazuh XML Rule · Active Response",
+    "code": "<rule id=\"60204\" level=\"10\">\n  <if_sid>60122</if_sid>\n  <description>Multiple Windows RDP/SMB logon failures (T1110)</description>\n  <mitre><id>T1110</id></mitre>\n</rule>\n# Active Response: Blocked [REDACTED_ATTACKER_IP] via Windows Firewall (100% ICMP loss)"
+  },
+  "diagram": {
+    "label": "Architecture",
+    "nodes": [
+      {
+        "title": "Kali attacker",
+        "sub": "Nmap · NetExec"
+      },
+      {
+        "title": "Windows 10 agent",
+        "sub": "VMware"
+      },
+      {
+        "title": "Wazuh manager",
+        "sub": "Azure · Rule 60204 · Active Response"
+      }
+    ],
+    "edges": [
+      "SMB/ICMP",
+      "PORT 1514"
+    ],
+    "hot": 2
+  },
+  "redactions": [
+    {
+      "label": "Manager IP",
+      "width": 6
+    },
+    {
+      "label": "Agent IPs",
+      "width": 7
+    }
+  ]
+}

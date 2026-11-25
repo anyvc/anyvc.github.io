@@ -1,0 +1,71 @@
+{
+  "id": "owasp-juice-shop",
+  "order": 7,
+  "cat": "Web app",
+  "group": "Offense",
+  "title": "OWASP Juice Shop",
+  "summary": "Challenges from one to four stars, documented in a 54-page write-up.",
+  "tags": [
+    "Burp Suite",
+    "browser DevTools",
+    "Docker"
+  ],
+  "meta": "LAS Week 3 · about 5 hours",
+  "card": {
+    "n": "54",
+    "unit": "pages",
+    "caption": "Forced browsing, SQLi, basket IDOR and negative quantities."
+  },
+  "kpis": [
+    {
+      "n": "54",
+      "label": "pages in the write-up"
+    },
+    {
+      "n": "1–4",
+      "label": "star challenges"
+    },
+    {
+      "n": "5 h",
+      "label": "about five hours in total"
+    }
+  ],
+  "sections": {
+    "did": [
+      "Forced browsing found unprotected hidden pages. Classic and UNION-based SQL injection gave an admin login and exposed user credentials."
+    ],
+    "results": [
+      "Broken access control (basket IDOR, forged feedback) and weak input validation (negative basket quantities) rounded out the findings.",
+      "Client-side validation is easy to bypass with an HTTP proxy."
+    ],
+    "next": [
+      "Add ownership checks on every API endpoint and validate number types and ranges on the server."
+    ]
+  },
+  "signal": "proxy/WAF log: SQLi payload on POST /rest/user/login, quantity -100 on PUT /api/BasketItems",
+  "artifact": {
+    "type": "HTTP proxy / WAF patterns",
+    "code": "# HTTP Proxy / WAF Anomaly Patterns:\nPOST /rest/user/login {\"email\":\"' OR 1=1--\",\"password\":\"x\"}\nPUT  /api/BasketItems/1 {\"ProductId\":1,\"quantity\":-100}"
+  },
+  "diagram": {
+    "label": "Attack chain",
+    "nodes": [
+      {
+        "title": "Browser / Burp proxy"
+      },
+      {
+        "title": "Forced browsing + SQLi",
+        "sub": "auth bypass"
+      },
+      {
+        "title": "Basket IDOR",
+        "sub": "negative quantity"
+      },
+      {
+        "title": "Admin + data exposure"
+      }
+    ],
+    "edges": [],
+    "hot": 3
+  }
+}
