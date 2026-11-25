@@ -1,0 +1,16 @@
+---
+const { kpis } = Astro.props;
+---
+<ul class="kpis" aria-label="Key numbers">
+  {kpis.map((k: { n: string; label: string }) => (
+    <li class="w-card kpi"><p class="w-num">{k.n}</p><p class="kl">{k.label}</p></li>
+  ))}
+</ul>
+<style>
+  .kpis { list-style: none; padding: 0; margin: 2rem 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .kpi { padding: 1.1rem 1rem; }
+  .kpi p { margin: 0; }
+  .kpi :global(.w-num) { font-size: clamp(1.5rem, 4vw, 2.25rem); overflow-wrap: anywhere; }
+  .kl { margin-top: .6rem !important; font: 400 .8rem/1.45 var(--font-mono); color: var(--color-muted); }
+  @media (max-width: 40rem) { .kpis { grid-template-columns: 1fr; } }
+</style>

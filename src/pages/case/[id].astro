@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+import site from '../../data/site.json';
+import Redact from '../../components/site/Redact.astro';
+import CaseHeader from '../../components/case/CaseHeader.astro';
+import KpiStrip from '../../components/case/KpiStrip.astro';
+import Toc from '../../components/case/Toc.astro';
+import CaseSection from '../../components/case/CaseSection.astro';
+import CaseFlow from '../../components/case/CaseFlow.astro';
+import CaseArtifact from '../../components/case/CaseArtifact.astro';
+import CaseDocs from '../../components/case/CaseDocs.astro';
+import PrevNext from '../../components/case/PrevNext.astro';
+import { getCases, SECTIONS } from '../../lib/cases';
+
+export async function getStaticPaths() {
+  const cases = await getCases();
+  return cases.map((entry, i) => ({ params: { id: entry.id }, props: { entry, prev: cases[i - 1] ?? null, next: cases[i + 1] ?? null } }));
+}
+const { entry, prev, next } = Astro.props;
+const c = entry.data;
+const secs = SECTIONS.filter(([k]) => c.sections[k]?.length);
+const toc = [...secs.map(([k, t]) => ({ id: `sec-${k}`, t })), ...(c.docs.length ? [{ id: 'sec-docs', t: 'Documents' }] : [])];
+const w = site.caseIntro.withheld;
+---
+<Base title={`${c.title} – ${site.name}`} description={c.summary} home={false}>
+  <div class="w-wrap page">
+    <CaseHeader entry={entry} />
+    <KpiStrip kpis={c.kpis} />
+    <div class="layout">
+      <aside class="side"><Toc items={toc} /></aside>
+      <article class="body">
+        {secs.map(([k, t]) => (
+          <CaseSection id={k} title={t} paras={c.sections[k]}>
+            {k === 'setup' && c.redactions && (
+              <p class="kv">Redacted on purpose: {c.redactions.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}</p>
+            )}
+            {k === 'did' && c.diagram && <CaseFlow diagram={c.diagram} />}
+            {k === 'results' && c.artifact && <CaseArtifact artifact={c.artifact} signal={c.signal} />}
+          </CaseSection>
+        ))}
+        {c.docs.length > 0 && <CaseDocs docs={c.docs} />}
+        <p class="kv">Withheld on purpose: {w[0].label} <Redact width={w[0].width} />, {w[1].label} <Redact width={w[1].width} /> and {w[2].label} <Redact width={w[2].width} />.</p>
+      </article>
+    </div>
+    <PrevNext prev={prev} next={next} />
+  </div>
+</Base>
+<style>
+  .layout { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); margin-top: 1rem; }
+  .side { padding-bottom: 1rem; border-bottom: 1px dashed var(--color-line); }
+  .kv { font: 400 .85rem/1.7 var(--font-mono); color: var(--color-muted); }
+  @media (min-width: 60rem) {
+    .layout { grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; }
+    .side { position: sticky; top: 7rem; align-self: start; border-bottom: 0; }
+  }
+</style>

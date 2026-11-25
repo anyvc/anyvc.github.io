@@ -1,0 +1,24 @@
+---
+const { entry } = Astro.props;
+const c = entry.data;
+const chips = [...c.cat.split(' · '), ...c.tags];
+const meta = [c.credit, c.meta].filter(Boolean).join(' · ');
+---
+<header class="ch">
+  <span class="stamp w-only-watcher" aria-hidden="true">CASE FILE // CLASSIFIED</span>
+  <p class="back"><a href={`/#card-${entry.id}`}>← All case files</a></p>
+  <h1>{c.title}</h1>
+  <p class="lead">{c.summary}</p>
+  <p class="chips">{chips.map((t: string) => <span class="w-chip">{t}</span>)}</p>
+  <p class="meta">{meta}</p>
+</header>
+<style>
+  .ch { position: relative; padding-top: 2rem; }
+  .back { font: 500 .85rem/1 var(--font-mono); margin-bottom: 1.5rem; }
+  .lead { font-size: 1.2rem; max-width: 46ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; max-width: none; }
+  .meta { font: 400 .85rem/1.6 var(--font-mono); color: var(--color-muted); }
+  .stamp { position: absolute; right: 0; top: 1.4rem; transform: rotate(4deg); padding: .35rem .7rem; font: 500 .75rem/1 var(--font-mono); letter-spacing: .12em; color: var(--color-accent-text); border: 2px solid var(--color-accent); }
+  @media (max-width: 40rem) { .stamp { position: static; display: inline-block; transform: rotate(-2deg); margin-bottom: 1rem; } }
+  :global(html[data-mode='watcher']) .ch::after { content: ''; position: absolute; right: -1rem; bottom: -.5rem; width: 9rem; height: 1.6rem; opacity: .5; pointer-events: none; background: repeating-linear-gradient(135deg, var(--color-accent) 0 6px, transparent 6px 14px); }
+</style>

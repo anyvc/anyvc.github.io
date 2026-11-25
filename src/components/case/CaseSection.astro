@@ -1,0 +1,13 @@
+---
+import { fmt } from '../../lib/format';
+const { id, title, paras = [] } = Astro.props;
+---
+<section class="sec" id={`sec-${id}`} data-sec aria-labelledby={`h-${id}`}>
+  <h2 id={`h-${id}`}>{title}</h2>
+  {paras.map((p: string) => <p set:html={fmt(p)} />)}
+  <slot />
+</section>
+<style>
+  .sec { margin-bottom: 2.5rem; }
+  :global(.sec p code) { padding: .05em .3em; background: var(--color-tint); border-radius: 2px; }
+</style>

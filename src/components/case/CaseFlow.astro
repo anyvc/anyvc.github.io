@@ -1,0 +1,26 @@
+---
+const { diagram: d } = Astro.props;
+---
+<figure class="flow">
+  <figcaption>{d.label}</figcaption>
+  <ol>
+    {d.nodes.map((n: { title: string; sub?: string }, i: number) => (
+      <li class:list={['nd', { hot: i === d.hot }]}>
+        <span class="sg">Stage {String(i + 1).padStart(2, '0')}</span>
+        <b>{n.title}</b>{n.sub && <small>{n.sub}</small>}
+        {d.edges?.[i] && i < d.nodes.length - 1 && <span class="edge">{d.edges[i]}</span>}
+      </li>
+    ))}
+  </ol>
+</figure>
+<style>
+  .flow { margin: 1.25rem 0; }
+  figcaption { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem; }
+  ol { list-style: none; margin: 0; padding: 0; }
+  .nd { display: flex; flex-direction: column; gap: .15rem; padding: .5rem 0 .9rem 1rem; border-left: 2px solid var(--color-line); }
+  .nd.hot { border-left-color: var(--color-accent); }
+  .sg { font: 500 .7rem/1 var(--font-mono); color: var(--color-muted); }
+  b { font-family: var(--font-body); font-weight: 600; }
+  small { font: 400 .8rem/1.4 var(--font-mono); color: var(--color-muted); }
+  .edge { font: 400 .75rem/1.4 var(--font-mono); color: var(--color-accent-text); }
+</style>
