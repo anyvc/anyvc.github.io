@@ -1,24 +1,172 @@
 ---
 import site from '../../data/site.json';
+import { eyeInner, coverageEyeSvg } from '../../lib/eyeSvg';
+
 const { contact } = site;
+const eyeCount = Array.from({ length: 22 }, (_, i) => [0.12, 0.45, 1][Math.floor(i / 20)] ?? 1);
+const email = contact.links.find(l => l.label === 'Email');
+const github = contact.links.find(l => l.label === 'GitHub');
+const linkedin = contact.links.find(l => l.label === 'LinkedIn');
+const cv = contact.links.find(l => l.label === 'CV');
 ---
-<section id="contact" class="w-wrap sec" aria-labelledby="contact-h">
-  <h2 id="contact-h">{contact.title}</h2>
-  <p class="lead">{contact.text}</p>
-  <ul class="links">
-    {contact.links.map(l => (
-      <li><a class="w-card link" href={l.href} download={l.download ? '' : undefined} target={l.href.startsWith('http') ? '_blank' : undefined} rel={l.href.startsWith('http') ? 'noopener' : undefined}>
-        <span class="k">{l.label}</span><span class="v">{l.text}</span>
-      </a></li>
+<footer id="contact" class="w-ecg contact-ft">
+  <div class="eyes w-only-watcher" id="eyes" aria-hidden="true">
+    {eyeCount.map(() => (
+      <div set:html={coverageEyeSvg('d')} />
     ))}
-  </ul>
-</section>
+  </div>
+
+  <!-- Watcher footer with contact box and closing outro eye -->
+  <div class="w-wrap ft-wrap w-only-watcher">
+    <h2 class="w-sec-h2">{contact.title}</h2>
+    <p class="w-sub">{contact.text}</p>
+    <div class="box">
+      {contact.links.map(l => (
+        <div class="row">
+          <span>{l.label}</span>
+          <a
+            href={l.href}
+            download={l.download ? '' : undefined}
+            target={l.href.startsWith('http') ? '_blank' : undefined}
+            rel={l.href.startsWith('http') ? 'noopener' : undefined}
+          >{l.text}</a>
+        </div>
+      ))}
+    </div>
+    <div class="outro">
+      <svg id="oeye" viewBox="0 0 80 40" role="img" aria-label="An eye that closes as you reach the end of the page" set:html={eyeInner()} />
+      <p class="o-mono" id="ocap">still watching</p>
+      <p class="o-mono"><a href="#top">back to top</a></p>
+    </div>
+  </div>
+
+  <!-- Clean editorial footer -->
+  <div class="w-wrap w-only-clean">
+    <div class="cl-contact">
+      <div>
+        <h2>{contact.title}</h2>
+        <p>{contact.text}</p>
+      </div>
+      <div class="cl-rows">
+        {email && <a class="cl-r w-mono" href={email.href}>{email.text}</a>}
+        {github && <a class="cl-r" href={github.href} target="_blank" rel="noopener">{github.text}</a>}
+        {linkedin && <a class="cl-r" href={linkedin.href} target="_blank" rel="noopener">{linkedin.text}</a>}
+        {cv && <a class="cl-r" href={cv.href} download>{cv.text}</a>}
+      </div>
+    </div>
+  </div>
+</footer>
+
 <style>
-  .sec { padding-block: 3rem 4rem; }
-  .lead { font-size: 1.15rem; }
-  .links { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }
-  .link { display: flex; flex-direction: column; gap: .35rem; height: 100%; text-decoration: none; color: var(--color-text); }
-  .link:hover, .link:focus-visible { box-shadow: 0 0 0 1px var(--color-accent-text); }
-  .k { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); }
-  .v { font: 600 1rem/1.35 var(--font-mono); overflow-wrap: anywhere; color: var(--color-accent-text); }
+  .contact-ft {
+    padding: 72px 0 56px;
+    position: relative;
+  }
+  :global(html[data-mode='clean']) .contact-ft { padding: 0; }
+
+  .ft-wrap { position: relative; z-index: 1; }
+  .w-sub { color: var(--color-muted); margin: 0 0 24px; max-width: 42em; }
+
+  .box {
+    border: 1px solid var(--color-line);
+    border-radius: 8px 40px 8px 40px;
+    padding: 6px 28px;
+    background: #090202;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .box .row:last-child { border-bottom: 0; }
+  .row span:first-child { color: var(--color-muted); }
+  .row a { text-decoration-color: var(--color-accent); }
+  .row a:hover { color: var(--color-danger); }
+  @media (max-width: 520px) {
+    .row { flex-direction: column; gap: 2px; }
+  }
+
+  /* Scattered breathing/blinking eyes behind contact footer */
+  .eyes {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .eyes > div {
+    position: absolute;
+    width: 56px;
+    opacity: 0;
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .eyes :global(svg) { width: 100%; display: block; }
+  .eyes :global(.lid) { animation: none !important; transition: transform .45s cubic-bezier(.4, 0, .2, 1); }
+
+  /* Closing outro eye */
+  .outro {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin: 80px 0 0;
+    text-align: center;
+  }
+  #oeye {
+    width: min(380px, 76vw);
+    overflow: visible;
+    animation: w-breathe 5s ease-in-out infinite alternate;
+  }
+  .o-mono {
+    font: 400 .84rem var(--font-mono);
+    color: var(--color-danger);
+    margin: 0;
+  }
+  .outro a { color: var(--color-danger); }
+  @media (prefers-reduced-motion: reduce) { #oeye { animation: none; } }
+
+  /* Clean editorial contact */
+  .cl-contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .9fr);
+    gap: 64px;
+    align-items: center;
+    border-top: 1px solid #E4E1DA;
+    padding: 56px 0 64px;
+  }
+  .cl-contact h2 {
+    font: 600 clamp(36px, 4.6vw, 58px)/1.08 var(--font-serif);
+    letter-spacing: -.02em;
+    color: #18181B;
+    margin: 0 0 18px;
+    max-width: 9.5em;
+  }
+  .cl-contact p {
+    font: 400 16px/1.7 var(--font-body);
+    color: #52525B;
+    max-width: 26em;
+    margin: 0;
+  }
+  .cl-rows { display: grid; gap: 12px; }
+  .cl-r {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #E4E1DA;
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #18181B;
+    text-decoration: none;
+    font: 400 15px/1.4 var(--font-body);
+  }
+  .cl-r:hover { border-color: #18181B; }
+  .cl-r.w-mono {
+    font: 400 13px/1.4 var(--font-mono);
+    color: #1E3A8A;
+  }
+  @media (max-width: 900px) {
+    .cl-contact { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  }
 </style>

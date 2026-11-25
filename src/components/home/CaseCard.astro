@@ -1,31 +1,183 @@
 ---
-import RedactionList from '../site/RedactionList.astro';
-const { entry } = Astro.props;
+const { entry, index } = Astro.props;
 const c = entry.data;
+const num3 = String(index + 1).padStart(3, '0');
+const num2 = String(index + 1).padStart(2, '0');
+const catSlug = c.cat.split(' ')[0].toLowerCase();
 ---
-<li class="case-item" data-group={c.group}>
-  <article class="w-card case" id={`card-${entry.id}`} data-case={entry.id}>
-    <span class="w-chip">{c.cat}</span>
-    <p class="w-num case-num">{c.card.n}{c.card.unit && <span class="case-unit">{c.card.unit}</span>}</p>
-    <p class="case-cap">{c.card.caption}</p>
-    <h3 class="case-title"><a href={`/case/${entry.id}/`} data-case-open={entry.id}>{c.title}</a></h3>
-    <p class="case-sum">{c.summary}</p>
-    {c.redactions && (
-      <p class="case-red"><RedactionList items={c.redactions} /></p>
-    )}
-  </article>
-</li>
+<article
+  class="pc"
+  id={`card-${entry.id}`}
+  data-case={entry.id}
+  data-g={c.group}
+  data-c={catSlug}
+  style={`--r:${index}`}
+  tabindex="0"
+  role="button"
+  aria-expanded="false"
+>
+  <span class="mono">
+    <span class="w-only-watcher">CASE {num3} · {c.cat}</span>
+    <span class="w-only-clean">CASE {num2} · {c.cat}</span>
+  </span>
+  <div class="pn">
+    {c.card.n}{c.card.unit && <small>{c.card.unit}</small>}
+  </div>
+  <h3><a href={`/case/${entry.id}/`} data-case-open={entry.id}>{c.title}</a></h3>
+  <p class="pc-sum">{c.summary}</p>
+  {c.signal && (
+    <p class="sig"><b>Log signal</b>{c.signal}</p>
+  )}
+  <span class="go" aria-hidden="true"><span class="gt">[ OPEN CASE FILE ]</span><b>↗</b></span>
+</article>
+
 <style>
-  .case { height: 100%; display: flex; flex-direction: column; gap: .55rem; cursor: pointer; }
-  .case:hover, .case:focus-within { box-shadow: 0 0 0 1px var(--color-accent-text); } /* box-shadow only: never touches the card border rules */
-  .case > * { margin: 0; }
-  .case .w-chip { align-self: flex-start; }
-  .case-num { margin-top: .4rem; }
-  .case-unit { margin-left: .4rem; font: 500 .8rem/1 var(--font-mono); color: var(--color-muted); }
-  .case-cap { color: var(--color-muted); font-size: .95rem; line-height: 1.4; }
-  .case-title { font-size: 1.2rem; margin-top: .6rem !important; }
-  .case-title a { color: var(--color-text); text-decoration: none; }
-  .case-title a:hover { text-decoration: underline; text-underline-offset: .2em; }
-  .case-sum { font-size: 1rem; line-height: 1.5; }
-  .case-red { margin-top: auto !important; padding-top: .5rem !important; font: 400 .78rem/1.6 var(--font-mono); color: var(--color-muted); }
+  .pc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    font: inherit;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 22px 20px 18px;
+    border: var(--shape-card-border);
+    border-top: var(--shape-card-top);
+    border-radius: var(--shape-radius);
+    background: var(--shape-card-bg);
+    scroll-margin-top: calc(84px + env(safe-area-inset-top, 0px));
+    transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .pc:hover,
+  .pc:focus-visible,
+  .pc[aria-expanded='true'] {
+    transform: translate(-3px, -3px);
+    box-shadow: 6px 6px 0 rgba(225, 6, 0, .45);
+    border-color: var(--color-accent);
+  }
+  .pc .mono {
+    font: 400 .8rem var(--font-mono);
+    color: var(--color-danger);
+  }
+  .pc h3 {
+    font: 900 1.15rem/1.15 var(--font-display);
+    margin: 4px 0 0;
+  }
+  .pc h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .pc-sum {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .pn {
+    font: 900 1.8rem/1 var(--font-display);
+    color: var(--color-text);
+  }
+  .pn small {
+    font: 400 .7rem var(--font-mono);
+    color: var(--color-muted);
+    margin-left: 6px;
+  }
+  .sig {
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px dashed var(--color-line);
+    font: 400 .72rem/1.4 var(--font-mono);
+    color: var(--color-muted);
+  }
+  .sig b {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 400;
+    font-size: .6rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .go {
+    margin-top: auto;
+    padding-top: 10px;
+    font: 400 .72rem var(--font-mono);
+    color: var(--color-danger);
+    letter-spacing: .08em;
+  }
+  .go b {
+    float: right;
+    font-weight: 400;
+    transition: transform .18s;
+  }
+  .pc:hover .go b { transform: translate(3px, -3px); }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) .pc {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 22px 22px 18px;
+  }
+  :global(html[data-mode='clean']) .pc:hover,
+  :global(html[data-mode='clean']) .pc:focus-visible,
+  :global(html[data-mode='clean']) .pc[aria-expanded='true'] {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--color-accent);
+  }
+  :global(html[data-mode='clean']) .pc .mono {
+    align-self: flex-start;
+    font: 500 11px/1 var(--font-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 4px 10px;
+    background: #fff;
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .pc[data-g='Defense'] .mono {
+    background: #E8EEFC; border-color: #C9D6F7; color: #1D4ED8;
+  }
+  :global(html[data-mode='clean']) .pc[data-g='Research'] .mono {
+    background: #FBF3D5; border-color: #EBD98E; color: #7A5B00;
+  }
+  :global(html[data-mode='clean']) .pc[data-g='Offense'] .mono {
+    background: #FBE9E7; border-color: #F2C4BF; color: #A32D26;
+  }
+  :global(html[data-mode='clean']) .pc[data-c='cloud'] .mono {
+    background: #E5F3E8; border-color: #BFE0C8; color: #17653A;
+  }
+  :global(html[data-mode='clean']) .pn {
+    font: 800 2.5rem/1 var(--font-display);
+    letter-spacing: -.04em;
+    color: var(--color-accent);
+    margin: 10px 0 2px;
+  }
+  :global(html[data-mode='clean']) .pn small {
+    font: 400 12px var(--font-mono);
+    letter-spacing: 0;
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .pc h3 {
+    font: 700 1.2rem/1.2 var(--font-display);
+    letter-spacing: -.02em;
+  }
+  :global(html[data-mode='clean']) .sig {
+    border-top: 1px solid var(--color-line);
+    padding-top: 10px;
+  }
+  :global(html[data-mode='clean']) .sig b {
+    font: 500 11px var(--font-mono);
+    color: var(--color-accent);
+    letter-spacing: .06em;
+  }
+  :global(html[data-mode='clean']) .go {
+    color: var(--color-accent);
+    font: 600 .8rem var(--font-body);
+    letter-spacing: 0;
+  }
 </style>

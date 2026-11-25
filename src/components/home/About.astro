@@ -1,22 +1,250 @@
 ---
 import site from '../../data/site.json';
-const { portrait, about } = site;
-const src = portrait ? (portrait.startsWith('/') ? portrait : '/' + portrait) : null;
+import { SILHOUETTE_SVG, ROSE_SVG, HAND_SVG } from '../../lib/eyeSvg';
+
+const { portrait, cleanPortrait, portraitCaption, about } = site;
+const resolveImg = (p: string | null | undefined) => (p ? (p.startsWith('/') ? p : '/' + p) : null);
+const watcherSrc = resolveImg(portrait);
+const cleanSrc = resolveImg(cleanPortrait ?? portrait);
 ---
-<section id="about" class="w-wrap sec" aria-labelledby="about-h">
-  <h2 id="about-h">About</h2>
-  <div class="row">
-    <div class="txt">{about.text.map(p => <p>{p}</p>)}</div>
-    {src
-      ? <img class="ph-img" src={src} alt="Portrait of Rayn Hanash Fasya" width="400" height="500" loading="lazy" />
-      : <div class="ph" role="img" aria-label="Portrait placeholder: no photo added yet"><span>Portrait placeholder</span><small>Set <code>portrait</code> in site.json</small></div>}
+<section id="about" class="w-sec w-ecg about-sec" aria-labelledby="about-h">
+  <!-- Watcher view -->
+  <div class="w-wrap about w-only-watcher">
+    <div class="pull" aria-hidden="true" set:html={HAND_SVG} />
+    {watcherSrc ? (
+      <img class="wph" src={watcherSrc} alt={`Portrait of ${site.name}`} width="816" height="816" loading="lazy" decoding="async" />
+    ) : (
+      <Fragment set:html={SILHOUETTE_SVG} />
+    )}
+    <div class="about-copy">
+      <h2 id="about-h" class="w-sec-h2">About</h2>
+      {about.text.map(p => <p>{p}</p>)}
+      {!watcherSrc && <p class="pslot">{about.photoSlotNote}</p>}
+    </div>
+    <div class="sticker" aria-hidden="true" set:html={ROSE_SVG} />
+  </div>
+
+  <!-- Clean editorial view -->
+  <div class="w-wrap cl-about w-only-clean">
+    <figure class="cl-ph">
+      {cleanSrc ? (
+        <img src={cleanSrc} alt={`${site.name} — ${portraitCaption}`} width="768" height="1024" loading="lazy" decoding="async" />
+      ) : (
+        <div class="cl-phb w-mono">[portrait photo]</div>
+      )}
+      <figcaption class="w-mono">{portraitCaption}</figcaption>
+    </figure>
+    <div>
+      <h2 class="cl-about-h">About</h2>
+      <p class="cl-al">{about.cleanLead}</p>
+      <p class="cl-ap">{about.cleanText}</p>
+      <div class="cl-stats">
+        {about.stats.map(s => (
+          <div><b>{s.n}</b><span class="w-mono">{s.label}</span></div>
+        ))}
+      </div>
+    </div>
   </div>
 </section>
+
 <style>
-  .sec { padding-block: 3rem; }
-  .row { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
-  .txt p { font-size: 1.15rem; }
-  .ph, .ph-img { width: min(100%, 16rem); aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--shape-radius); }
-  .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem; text-align: center; border: 1px dashed var(--color-border); color: var(--color-muted); font: 500 .8rem/1.4 var(--font-mono); background: var(--color-surface); }
-  @media (min-width: 48rem) { .row { grid-template-columns: minmax(0, 1fr) auto; gap: 3rem; } }
+  .about-sec {
+    overflow-x: clip;
+    padding-bottom: 124px;
+  }
+  :global(html[data-mode='clean']) .about-sec { padding-bottom: 56px; }
+
+  /* Watcher layout */
+  .about {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 1.15fr minmax(260px, 420px);
+    gap: 64px;
+    align-items: center;
+  }
+  .about::before {
+    content: '';
+    position: absolute;
+    right: -8%;
+    top: 50%;
+    width: min(760px, 90vw);
+    aspect-ratio: 1;
+    transform: translateY(-50%);
+    background: radial-gradient(closest-side, rgba(170, 0, 0, .32), rgba(90, 0, 0, .16) 45%, transparent 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .about-copy { order: 1; }
+  .about-copy p { max-width: 34em; font-size: 1.3rem; }
+  .about-copy .pslot {
+    font: 400 .84rem var(--font-mono);
+    color: var(--color-danger);
+    margin: 0;
+  }
+  .about :global(.about-sil) {
+    order: 2;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1;
+    justify-self: end;
+    border-radius: 46% 54% 40% 60% / 55% 40% 60% 45%;
+    -webkit-mask-image: radial-gradient(ellipse 52% 54% at 50% 48%, #000 60%, transparent 100%);
+    mask-image: radial-gradient(ellipse 52% 54% at 50% 48%, #000 60%, transparent 100%);
+  }
+  .wph {
+    order: 2;
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    justify-self: end;
+    aspect-ratio: 1;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.12) drop-shadow(6px 6px 0 rgba(225, 6, 0, .45));
+  }
+  .sticker {
+    position: absolute;
+    right: 340px;
+    bottom: 24px;
+    width: 124px;
+    transform: rotate(8deg);
+    z-index: 3;
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, .6));
+    pointer-events: none;
+  }
+  .sticker :global(svg) { width: 100%; display: block; }
+  @media (max-width: 1300px) { .sticker { display: none; } }
+
+  /* Hand-pull reveal (Watcher) */
+  .pull {
+    position: absolute;
+    left: -124px;
+    top: 14%;
+    width: 130px;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .pull :global(svg) {
+    display: block;
+    width: 100%;
+    transform: rotate(90deg);
+    filter: drop-shadow(3px 3px 0 rgba(225, 6, 0, .5));
+  }
+  .pull::before {
+    content: '';
+    position: absolute;
+    top: calc(50% - 20px);
+    right: calc(100% + 9px);
+    width: 110vw;
+    height: 56px;
+    background: linear-gradient(180deg, #050202 0 90%, #1a0505);
+    border-top: 2px solid #e10600;
+    border-bottom: 2px solid #e10600;
+  }
+  :global(html[data-mode='watcher'] #about.rv2 .about) {
+    opacity: 0;
+    transform: translateX(60vw);
+  }
+  :global(html[data-mode='watcher'] #about.rv2.go2 .about) {
+    opacity: 1;
+    transform: none;
+    transition: transform 1.4s cubic-bezier(.22, .8, .2, 1) .8s, opacity .5s ease .8s;
+  }
+  :global(html[data-mode='watcher'] #about.rv2.go2 .pull) {
+    animation: w-pullin 3s ease both;
+  }
+  @keyframes w-pullin {
+    0% { opacity: 0; transform: translateX(-240px); }
+    10% { opacity: 1; transform: translateX(0); }
+    72% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-110px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pull { display: none; }
+    :global(#about.rv2 .about) { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+
+  @media (max-width: 860px) {
+    .about { grid-template-columns: 1fr; gap: 36px; }
+    .about::before { left: -10%; right: auto; top: 130px; transform: none; width: 420px; }
+    .about :global(.about-sil),
+    .wph { order: 0; justify-self: start; max-width: 240px; }
+  }
+
+  /* Clean editorial layout */
+  .cl-about {
+    display: grid;
+    grid-template-columns: minmax(0, 342px) minmax(0, 1fr);
+    gap: 72px;
+    align-items: start;
+    padding-block: 12px;
+  }
+  .cl-ph { margin: 0; }
+  .cl-phb,
+  .cl-ph img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border: 1px solid var(--color-line);
+    object-fit: cover;
+    object-position: center 22%;
+  }
+  .cl-phb {
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    color: #52525B;
+    background: repeating-linear-gradient(135deg, #F3F2EC 0 14px, #FCFBF9 14px 28px);
+  }
+  .cl-ph figcaption {
+    font-size: 12px;
+    color: #52525B;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .cl-about-h {
+    font: 600 clamp(34px, 4vw, 46px)/1.1 var(--font-serif);
+    letter-spacing: -.02em;
+    color: #18181B;
+    margin: 0 0 22px;
+  }
+  .cl-al {
+    font: 400 clamp(22px, 2.4vw, 28px)/1.35 var(--font-serif);
+    color: #18181B;
+    max-width: 21em;
+    margin: 0 0 20px;
+  }
+  .cl-ap {
+    font: 400 16px/1.7 var(--font-body);
+    color: #52525B;
+    max-width: 34em;
+    margin: 0 0 30px;
+  }
+  .cl-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    border-top: 1px solid #E4E1DA;
+    padding-top: 22px;
+  }
+  .cl-stats b {
+    display: block;
+    font: 400 clamp(30px, 3.4vw, 44px)/1.1 var(--font-serif);
+    color: #18181B;
+  }
+  .cl-stats span {
+    display: block;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #52525B;
+    margin-top: 6px;
+  }
+  @media (max-width: 900px) {
+    .cl-about { grid-template-columns: minmax(0, 1fr); gap: 36px; max-width: 640px; }
+    .cl-ph { max-width: 342px; }
+  }
+  @media (max-width: 600px) {
+    .cl-stats { grid-template-columns: 1fr; gap: 18px; }
+  }
 </style>

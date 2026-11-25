@@ -1,54 +1,377 @@
 ---
 import site from '../../data/site.json';
-import WatcherEye from '../site/WatcherEye.astro';
-const { hero } = site;
+import { heroEyeInner, heroLogRows } from '../../lib/eyeSvg';
+
+const { hero, contact } = site;
+const logs = heroLogRows();
+const github = contact.links.find(l => l.label === 'GitHub');
+const linkedin = contact.links.find(l => l.label === 'LinkedIn');
+const email = contact.links.find(l => l.label === 'Email');
+const cv = contact.links.find(l => l.label === 'CV');
+const nameParts = site.name.split(' ');
 ---
-<section class="hero" id="top" aria-labelledby="hero-h1">
-  <div class="hero-eye w-only-watcher" aria-hidden="true"><WatcherEye variant="hero" uid="hero" /></div>
-  <div class="w-wrap hero-in">
-    <p class="badge"><span class="dot" aria-hidden="true"></span>{hero.badge}</p>
-    <p class="wordmark"><span>Rayn</span> <span>Hanash</span> <span>Fasya</span></p>
-    <h1 id="hero-h1">{hero.headline}</h1>
-    <p class="sub">{hero.sub}</p>
-    <p class="actions">
-      {hero.buttons.map(b => (
-        <a class:list={['btn', { primary: b.primary }]} href={b.href} download={b.download ? '' : undefined}>
-          {b.label}{b.download ? ' (PDF)' : ''}
-        </a>
-      ))}
-    </p>
+<header class="hero" id="top">
+  <!-- Watcher background layers -->
+  <div class="logs w-only-watcher" aria-hidden="true">
+    {logs.map(r => (
+      <div
+        class="lr"
+        style={`animation-duration:${r.dur}s${r.rev ? ';animation-direction:reverse' : ''}`}
+      >{r.text}</div>
+    ))}
   </div>
-</section>
+  <svg id="heye" class="w-only-watcher" viewBox="-200 -200 400 400" aria-hidden="true" set:html={heroEyeInner()} />
+  <div class="live w-only-watcher">{hero.liveLine}</div>
+
+  <!-- Unified semantic hero container with strictly ONE <h1> -->
+  <div class="hero-inner">
+    <div class="hero-left">
+      <p class="cl-badge w-only-clean"><i aria-hidden="true"></i>{hero.badge}</p>
+      <h1 class="hero-h1">
+        <span class="w-only-watcher w-name">{nameParts.map(p => <span>{p}</span>)}</span>
+        <span class="w-only-clean cl-h1">{hero.headline}</span>
+      </h1>
+      <p class="lead w-only-watcher">{hero.headline}</p>
+      <p class="sub">{hero.sub}</p>
+      <p class="mono-line w-only-watcher">{hero.badge}</p>
+      <p class="mono-line w-only-watcher">{hero.statusLine}</p>
+
+      <p class="links w-only-watcher">
+        {github && <a href={github.href} target="_blank" rel="noopener">{github.label}</a>}
+        {linkedin && <a href={linkedin.href} target="_blank" rel="noopener">{linkedin.label}</a>}
+        <a class="cta" href="#case">See what I’ve built</a>
+        <a class="cta" href="#contact">Work with me</a>
+      </p>
+
+      <p class="cl-cta w-only-clean">
+        <a class="cl-btn" href="#case">See what I’ve built</a>
+        <a class="cl-btn ghost" href="#contact">Work with me</a>
+        {cv && <a class="cl-btn ghost" href={cv.href} download>Download CV</a>}
+      </p>
+    </div>
+
+    <div class="cl-links w-only-clean">
+      {github && (
+        <a class="cl-lc" href={github.href} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" /></svg>
+          <span><b>{github.label}</b><em>{github.text}</em></span>
+        </a>
+      )}
+      {linkedin && (
+        <a class="cl-lc" href={linkedin.href} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 11v5M8 8v.01M12 16v-5M12 13c0-1.5 1-2 2-2s2 .8 2 2v3" /></svg>
+          <span><b>{linkedin.label}</b><em>{linkedin.text}</em></span>
+        </a>
+      )}
+      {email && (
+        <a class="cl-lc" href={email.href}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
+          <span><b>{email.label}</b><em>{email.text}</em></span>
+        </a>
+      )}
+    </div>
+  </div>
+</header>
 
 <style>
-  .hero { position: relative; overflow: hidden; padding-block: clamp(2.5rem, 8vw, 6rem); }
-  .hero-in { position: relative; z-index: 1; }
-  .badge { display: inline-flex; align-items: center; gap: .6rem; font: 500 .8rem/1.3 var(--font-mono); color: var(--color-accent-text); margin: 0 0 1.5rem; padding: .4rem .7rem; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
-  .dot { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--color-accent); }
-  .wordmark { margin: 0 0 1.25rem; font-family: var(--font-display); font-weight: var(--font-display-weight); line-height: .9; overflow-wrap: anywhere; }
-  .wordmark span { display: block; }
-  .hero h1 { max-width: 19em; margin: 0 0 1rem; }
-  .sub { max-width: 40em; color: var(--color-muted); font-size: 1.1rem; margin-bottom: 1.75rem; }
-  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; max-width: none; margin: 0; }
-  .btn { display: inline-block; padding: .75rem 1.3rem; border: 1px solid var(--color-border); border-radius: var(--shape-radius); color: var(--color-text); text-decoration: none; font: 600 1rem/1.2 var(--font-mono); }
-  .btn:hover { border-color: var(--color-accent-text); color: var(--color-accent-text); }
-  .btn.primary { border-width: 2px; border-color: var(--color-accent); }
+  /* Watcher hero */
+  .hero {
+    position: relative;
+    min-height: calc(100svh - 64px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-bottom: 110px;
+    background: radial-gradient(ellipse at 75% 45%, var(--deco-hero-glow) 0, var(--deco-hero-mid) 45%, var(--color-bg) 75%);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 3px);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 72% 50%, transparent 38%, rgba(0, 0, 0, .6) 100%);
+  }
+  @media (min-width: 861px) {
+    .hero { min-height: calc(100svh - 64px + 110px); }
+  }
+  .logs {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    font: 400 .72rem/1.9 var(--font-mono);
+    color: rgba(225, 6, 0, .16);
+    overflow: hidden;
+    user-select: none;
+    pointer-events: none;
+  }
+  .lr {
+    white-space: nowrap;
+    width: max-content;
+    animation: lrs linear infinite;
+  }
+  @keyframes lrs { to { transform: translateX(-50%); } }
 
-  /* Watcher: name is the loud wordmark, positioning line stays readable body type. Primary button is an outline (red fill would fail small-text contrast). */
-  :global(html[data-mode='watcher']) .hero { background: radial-gradient(ellipse at 75% 45%, var(--deco-hero-glow) 0, var(--deco-hero-mid) 45%, var(--color-bg) 75%); }
-  :global(html[data-mode='watcher']) .wordmark { font-size: clamp(2.4rem, 12vw, 8rem); letter-spacing: -.04em; text-shadow: 5px 4px 0 var(--color-accent); }
-  :global(html[data-mode='watcher']) .hero h1 { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.4rem, 3vw, 2.1rem); line-height: 1.3; }
-  :global(html[data-mode='watcher']) .btn.primary:hover { background: var(--color-tint); }
-  .hero-eye { position: absolute; right: -12%; top: 50%; width: min(80vw, 40rem); transform: translateY(-50%); opacity: .5; }
-  /* Glitch burst every few seconds: Watcher + full fx only, never on coarse pointers or reduced motion. */
-  @keyframes glitch { 0%, 91%, 100% { text-shadow: 5px 4px 0 var(--color-accent); transform: none; } 93% { text-shadow: -6px 2px 0 var(--color-accent-text), 6px 4px 0 var(--color-accent); transform: translateX(3px); } 96% { text-shadow: 4px -2px 0 var(--color-accent-text), -4px 4px 0 var(--color-accent); transform: translateX(-2px); } }
-  @media (prefers-reduced-motion: no-preference) and (pointer: fine) { :global(html[data-mode='watcher'][data-fx='full']) .wordmark { animation: glitch 7s steps(1, end) infinite; } }
+  #heye {
+    position: absolute;
+    right: -8%;
+    top: 50%;
+    width: min(70vw, 780px);
+    transform: translateY(-50%);
+    opacity: .95;
+    pointer-events: none;
+  }
+  @media (min-width: 861px) {
+    #heye { right: -1%; top: 45.5%; width: min(54vw, 112vh); }
+  }
+  #heye :global(#piv) { transition: transform .14s ease-out; }
+  #heye :global(#ball), #heye :global(#sun) { will-change: transform; }
 
-  /* Clean: the positioning line leads, the name is a small kicker. Primary is a solid blue fill with white text (6.7:1). */
-  :global(html[data-mode='clean']) .wordmark { font-size: 1rem; letter-spacing: 0; line-height: 1.3; color: var(--color-muted); margin-bottom: .75rem; }
-  :global(html[data-mode='clean']) .wordmark span { display: inline; }
-  :global(html[data-mode='clean']) .hero h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); letter-spacing: -.02em; }
-  :global(html[data-mode='clean']) .btn.primary { background: var(--color-accent); color: var(--color-on-accent); }
-  :global(html[data-mode='clean']) .btn.primary:hover { filter: brightness(.92); color: var(--color-on-accent); }
-  @media print { .hero { padding-block: 1rem; background: none !important; } .btn { border-color: #999; } }
+  .live {
+    position: absolute;
+    right: 24px;
+    top: 14px;
+    z-index: 3;
+    font: 400 .84rem var(--font-mono);
+    color: var(--color-danger);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  @media (min-width: 861px) {
+    .hero-inner { max-width: none; padding-left: 38px; }
+  }
+  @media (min-width: 1100px) {
+    .hero-inner { padding-left: 54px; }
+  }
+
+  .hero-h1 { margin: 0; }
+  .w-name {
+    display: block;
+    font: 900 clamp(3.2rem, 12.5vw, 10rem)/.88 var(--font-display);
+    margin: 0 0 32px;
+    letter-spacing: -.04em;
+    position: relative;
+  }
+  @media (min-width: 861px) {
+    .w-name { font-size: clamp(3.2rem, 9.5vw, 10rem); }
+  }
+  @media (min-width: 1100px) {
+    .w-name { font-size: clamp(3.2rem, 9.2vw, 11rem); }
+  }
+  .w-name span {
+    display: block;
+    position: relative;
+    text-shadow: 5px 4px 0 var(--color-accent), 0 0 36px rgba(0, 0, 0, .6);
+  }
+  .lead {
+    font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+    max-width: 19em;
+    margin: 0 0 8px;
+  }
+  @media (min-width: 1100px) {
+    .lead { font-size: clamp(1.5rem, 1.9vw, 2.2rem); }
+  }
+  .sub {
+    color: var(--color-muted);
+    margin: 0 0 20px;
+    max-width: 42em;
+  }
+  .mono-line {
+    font: 400 .84rem var(--font-mono);
+    color: var(--color-danger);
+    margin: 0 0 20px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+    margin: 0;
+  }
+  .links a {
+    text-decoration-color: var(--color-accent);
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: #fff;
+    text-decoration: none;
+    font: 600 .72rem var(--font-display);
+    letter-spacing: .01em;
+  }
+  .cta:hover { background: #ff2a22; }
+
+  @media (max-width: 860px) {
+    .hero {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      min-height: 0;
+      padding-top: 4px;
+      padding-bottom: 48px;
+    }
+    #heye {
+      position: relative;
+      right: auto;
+      top: auto;
+      width: min(84vw, 400px);
+      margin: 6px auto 0;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+    .hero-inner {
+      background: linear-gradient(180deg, transparent, rgba(6, 3, 3, .85) 16%);
+      padding-top: 12px;
+    }
+    .live { display: none; }
+  }
+
+  /* Clean view hero (2-column editorial) */
+  :global(html[data-mode='clean']) .hero {
+    min-height: 0;
+    display: block;
+    padding: 0;
+    background: var(--color-bg);
+  }
+  :global(html[data-mode='clean']) .hero::before,
+  :global(html[data-mode='clean']) .hero::after {
+    display: none;
+  }
+  :global(html[data-mode='clean']) .hero-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 96px 24px 64px;
+    background: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+    gap: 64px;
+    align-items: center;
+    text-align: left;
+  }
+  .cl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font: 500 12px/1.5 var(--font-body);
+    color: #18181B;
+    margin: 0 0 22px;
+  }
+  .cl-badge i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #B3261E;
+  }
+  .cl-h1 {
+    display: block;
+    font: 600 clamp(38px, 4.7vw, 64px)/1.08 var(--font-serif);
+    letter-spacing: -.02em;
+    color: #18181B;
+    margin: 0 0 22px;
+    max-width: 13em;
+  }
+  :global(html[data-mode='clean']) .sub {
+    font: 400 18px/1.6 var(--font-body);
+    color: #52525B;
+    max-width: 30em;
+    margin: 0 0 28px;
+  }
+  .cl-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0;
+  }
+  .cl-btn {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font: 600 14px/1.2 var(--font-body);
+    text-decoration: none;
+    border: 1px solid #18181B;
+    background: #18181B;
+    color: #FCFBF9;
+  }
+  .cl-btn:hover { background: #3f3f46; border-color: #3f3f46; }
+  .cl-btn.ghost {
+    background: #FCFBF9;
+    color: #52525B;
+    border-color: var(--color-line);
+    font-weight: 500;
+  }
+  .cl-btn.ghost:hover { border-color: #18181B; color: #18181B; }
+
+  .cl-links {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+    width: 100%;
+    justify-self: end;
+  }
+  .cl-lc {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #E4E1DA;
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #18181B;
+    text-decoration: none;
+    font: 400 15px/1.4 var(--font-body);
+  }
+  .cl-lc:hover { border-color: #18181B; }
+  .cl-lc svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: none;
+    stroke: #18181B;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cl-lc span { display: grid; gap: 2px; }
+  .cl-lc b { font-weight: 500; }
+  .cl-lc em {
+    font: 400 12.5px/1.4 var(--font-mono);
+    color: #52525B;
+    font-style: normal;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 900px) {
+    :global(html[data-mode='clean']) .hero-inner {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 36px;
+      padding-top: 64px;
+      padding-bottom: 48px;
+    }
+    .cl-links { justify-self: stretch; max-width: none; }
+  }
 </style>

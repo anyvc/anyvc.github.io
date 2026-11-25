@@ -15,7 +15,10 @@ import { getCases, SECTIONS } from '../../lib/cases';
 
 export async function getStaticPaths() {
   const cases = await getCases();
-  return cases.map((entry, i) => ({ params: { id: entry.id }, props: { entry, prev: cases[i - 1] ?? null, next: cases[i + 1] ?? null } }));
+  return cases.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, prev: cases[i - 1] ?? null, next: cases[i + 1] ?? null },
+  }));
 }
 const { entry, prev, next } = Astro.props;
 const c = entry.data;
@@ -23,34 +26,68 @@ const secs = SECTIONS.filter(([k]) => c.sections[k]?.length);
 const toc = [...secs.map(([k, t]) => ({ id: `sec-${k}`, t })), ...(c.docs.length ? [{ id: 'sec-docs', t: 'Documents' }] : [])];
 ---
 <Base title={`${c.title} – ${site.name}`} description={c.summary} home={false}>
-  <div class="w-wrap page">
-    <CaseHeader entry={entry} />
-    <KpiStrip kpis={c.kpis} />
-    <div class="layout">
-      <aside class="side"><Toc items={toc} /></aside>
-      <article class="body">
-        {secs.map(([k, t]) => (
-          <CaseSection id={k} title={t} paras={c.sections[k]}>
-            {k === 'setup' && c.redactions && (
-              <p class="kv">Redacted on purpose: <RedactionList items={c.redactions} /></p>
-            )}
-            {k === 'did' && c.diagram && <CaseFlow diagram={c.diagram} />}
-            {k === 'results' && c.artifact && <CaseArtifact artifact={c.artifact} signal={c.signal} />}
-          </CaseSection>
-        ))}
-        {c.docs.length > 0 && <CaseDocs docs={c.docs} />}
-        <p class="kv"><Withheld /></p>
-      </article>
+  <div class="case-page">
+    <div class="cf-main">
+      <CaseHeader entry={entry} />
+      <KpiStrip kpis={c.kpis} />
+      <div class="cf-grid">
+        <aside class="cf-side"><Toc items={toc} /></aside>
+        <article class="cf-body">
+          {secs.map(([k, t], idx) => (
+            <CaseSection id={k} title={t} paras={c.sections[k]} first={idx === 0}>
+              {k === 'setup' && c.redactions && (
+                <p class="cf-kv">Redacted on purpose: <RedactionList items={c.redactions} /></p>
+              )}
+              {k === 'did' && c.diagram && <CaseFlow diagram={c.diagram} />}
+              {k === 'results' && c.artifact && <CaseArtifact artifact={c.artifact} signal={c.signal} />}
+            </CaseSection>
+          ))}
+          {c.docs.length > 0 && <CaseDocs docs={c.docs} />}
+          <p class="cf-kv withheld-end"><Withheld /></p>
+        </article>
+      </div>
+      <PrevNext prev={prev} next={next} />
     </div>
-    <PrevNext prev={prev} next={next} />
   </div>
 </Base>
+
 <style>
-  .layout { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); margin-top: 1rem; }
-  .side { padding-bottom: 1rem; border-bottom: 1px dashed var(--color-line); }
-  .kv { font: 400 .85rem/1.7 var(--font-mono); color: var(--color-muted); }
-  @media (min-width: 60rem) {
-    .layout { grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; }
-    .side { position: sticky; top: 7rem; align-self: start; border-bottom: 0; }
+  .case-page {
+    min-height: calc(100svh - 80px);
+  }
+  :global(html[data-mode='watcher']) .case-page {
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at 85% 0, #2a0000 0, #0b0303 42%, #060303 75%);
+  }
+  .cf-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px 80px;
+  }
+  @media (min-width: 860px) {
+    .cf-main { padding: 40px 6vw 80px; }
+  }
+  .cf-grid {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  .cf-side {
+    position: sticky;
+    top: 96px;
+  }
+  .cf-body { min-width: 0; }
+  .cf-kv {
+    font: 400 13px/1.6 var(--font-mono);
+    color: var(--color-muted);
+    margin: 0 0 8px;
+  }
+  .withheld-end { margin-top: 12px; }
+
+  @media (max-width: 860px) {
+    .cf-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .cf-side { position: static; }
   }
 </style>

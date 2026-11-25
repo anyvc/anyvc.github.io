@@ -5,23 +5,31 @@ import TokenStyles from '../components/TokenStyles.astro';
 import Nav from '../components/site/Nav.astro';
 import Footer from '../components/site/Footer.astro';
 import site from '../data/site.json';
+import { SHARED_EYE_DEFS } from '../lib/eyeSvg';
+
 const { title = site.title, description = site.description, home = true, noindex = false } = Astro.props;
 const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/';
-const url = new URL(path, site.siteUrl).href; // GitHub Pages serves directories with a trailing slash
-// Preload the two fonts the default (Watcher) first paint needs. If the glob finds nothing, no preload is emitted and nothing breaks.
+const url = new URL(path, site.siteUrl).href;
 const fontFiles = import.meta.glob('../../node_modules/@fontsource/{unbounded/files/unbounded-latin-900-normal.woff2,newsreader/files/newsreader-latin-400-normal.woff2}', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 const preloads = Object.values(fontFiles);
-const person = { '@context': 'https://schema.org', '@type': 'Person', name: site.name, url: site.siteUrl, description: site.description,
-  sameAs: site.contact.links.filter(l => l.href.startsWith('https://')).map(l => l.href) };
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: site.siteUrl,
+  description: site.description,
+  sameAs: site.contact.links.filter(l => l.href.startsWith('https://')).map(l => l.href),
+};
 const og = new URL(site.ogImage, site.siteUrl).href;
 ---
 <!doctype html>
-<html lang="en" data-mode="watcher" data-fx="full">
+<html lang="en" data-mode="watcher">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#060303" />
     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={url} />}
     {preloads.map(h => <link rel="preload" as="font" type="font/woff2" href={h} crossorigin />)}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -42,7 +50,6 @@ const og = new URL(site.ogImage, site.siteUrl).href;
     {path === '/' && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
     <TokenStyles />
     <script is:inline>
-      // Runs before first paint. Order: stored choice, then reduced motion -> Clean, else Watcher.
       (function () {
         var d = document.documentElement;
         d.classList.add('js');
@@ -52,23 +59,31 @@ const og = new URL(site.ogImage, site.siteUrl).href;
           m = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'clean' : 'watcher';
         }
         d.dataset.mode = m;
-        // Effects tier. Lite = no grain, scanlines, glitch or marquee motion (eyes and coverage stay).
-        var lite = false;
-        try {
-          var n = navigator, c = n.connection || {}, mm = function (q) { return window.matchMedia && matchMedia(q).matches; };
-          lite = mm('(pointer: coarse)') || mm('(prefers-reduced-motion: reduce)') ||
-            (n.hardwareConcurrency && n.hardwareConcurrency <= 4) || (n.deviceMemory && n.deviceMemory <= 4) || !!c.saveData;
-        } catch (e) {}
-        d.dataset.fx = lite ? 'lite' : 'full';
       })();
     </script>
   </head>
   <body>
-    <div class="w-fx w-grain" aria-hidden="true"></div><div class="w-fx w-scan" aria-hidden="true"></div>
+    <Fragment set:html={SHARED_EYE_DEFS} />
+    <div class="w-fx w-grain" aria-hidden="true"></div>
+    <div class="w-fx w-scan" aria-hidden="true"></div>
+    <div id="ret" aria-hidden="true">
+      <svg viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="2.6">
+        <circle cx="23" cy="23" r="13" />
+        <path d="M23 0v12M23 34v12M0 23h12M34 23h12" />
+        <circle cx="23" cy="23" r="1.5" fill="currentColor" />
+      </svg>
+      <b></b>
+    </div>
     <a class="w-skip" href="#main">Skip to content</a>
     <Nav home={home} />
     <main id="main"><slot /></main>
-    <Footer />
-    <script>import '../scripts/mode'; import '../scripts/eyes'; import '../scripts/reticle'; import '../scripts/nav';</script>
+    {!home && <Footer />}
+    <script>
+      import '../scripts/mode';
+      import '../scripts/eyes';
+      import '../scripts/reticle';
+      import '../scripts/nav';
+      import '../scripts/watcher-fx';
+    </script>
   </body>
 </html>

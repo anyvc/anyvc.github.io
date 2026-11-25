@@ -1,24 +1,99 @@
 ---
 const { entry } = Astro.props;
 const c = entry.data;
-const chips = [...c.cat.split(' · '), ...c.tags];
+const chips = [...c.cat.split(' · '), ...c.tags, '2026'];
 const meta = [c.credit, c.meta].filter(Boolean).join(' · ');
 ---
 <header class="ch">
-  <span class="stamp w-only-watcher" aria-hidden="true">CASE FILE // CLASSIFIED</span>
-  <p class="back"><a href={`/#card-${entry.id}`}>← All case files</a></p>
+  <div class="ch-bar">
+    <p class="cf-backp"><a href={`/#card-${entry.id}`}>← All case files</a></p>
+    <span class="cf-stamp w-only-watcher" aria-hidden="true">CASE FILE // CLASSIFIED</span>
+  </div>
   <h1>{c.title}</h1>
-  <p class="lead">{c.summary}</p>
-  <p class="chips">{chips.map((t: string) => <span class="w-chip">{t}</span>)}</p>
-  <p class="meta">{meta}</p>
+  <p class="cf-lead">{c.summary}</p>
+  <p class="cf-pills">{chips.map((t: string) => <span class="cf-pill">{t}</span>)}</p>
+  {meta && <p class="cf-kv">{meta}</p>}
 </header>
+
 <style>
-  .ch { position: relative; padding-top: 2rem; }
-  .back { font: 500 .85rem/1 var(--font-mono); margin-bottom: 1.5rem; }
-  .lead { font-size: 1.2rem; max-width: 46ch; }
-  .chips { display: flex; flex-wrap: wrap; gap: .4rem; max-width: none; }
-  .meta { font: 400 .85rem/1.6 var(--font-mono); color: var(--color-muted); }
-  .stamp { position: absolute; right: 0; top: 1.4rem; transform: rotate(4deg); padding: .35rem .7rem; font: 500 .75rem/1 var(--font-mono); letter-spacing: .12em; color: var(--color-accent-text); border: 2px solid var(--color-accent); }
-  @media (max-width: 40rem) { .stamp { position: static; display: inline-block; transform: rotate(-2deg); margin-bottom: 1rem; } }
-  :global(html[data-mode='watcher']) .ch::after { content: ''; position: absolute; right: -1rem; bottom: -.5rem; width: 9rem; height: 1.6rem; opacity: .5; pointer-events: none; background: repeating-linear-gradient(135deg, var(--color-accent) 0 6px, transparent 6px 14px); }
+  .ch { margin-bottom: 40px; }
+  .ch-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .cf-backp { margin: 0; font: 600 .95rem var(--font-body); }
+  .cf-backp a { color: var(--color-warn); text-decoration: none; }
+  .cf-backp a:hover { color: var(--color-text); }
+  .cf-stamp {
+    display: inline-block;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    font: 400 .7rem var(--font-mono);
+    letter-spacing: .14em;
+    padding: 4px 10px;
+    transform: rotate(-2deg);
+  }
+  h1 {
+    font: 900 clamp(2.2rem, 6vw, 4.6rem)/.98 var(--font-display);
+    letter-spacing: -.03em;
+    color: var(--color-text);
+    text-shadow: 4px 3px 0 var(--color-accent);
+    margin: 0 0 14px;
+  }
+  .cf-lead {
+    font-size: 1.25rem;
+    color: var(--color-muted);
+    max-width: 640px;
+    margin: 0 0 24px;
+  }
+  .cf-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 14px;
+  }
+  .cf-pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-line);
+    background: rgba(20, 0, 0, .5);
+    color: var(--color-text);
+    padding: 5px 12px;
+    font: 400 .75rem var(--font-mono);
+    line-height: 1.5;
+  }
+  .cf-kv {
+    font: 400 13px/1.6 var(--font-mono);
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) .cf-backp a { color: var(--color-accent); }
+  :global(html[data-mode='clean']) .cf-backp a:hover { color: #1E40AF; }
+  :global(html[data-mode='clean']) h1 {
+    font: 700 clamp(2.2rem, 5vw, 3.25rem)/1.1 var(--font-display);
+    letter-spacing: -.03em;
+    text-shadow: none;
+    color: var(--color-text);
+  }
+  :global(html[data-mode='clean']) .cf-lead {
+    font: 400 1.125rem/1.55 var(--font-body);
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .cf-pill {
+    border: 1px solid var(--color-line);
+    background: #fff;
+    color: var(--color-muted);
+    border-radius: 999px;
+    font: 500 11px/1 var(--font-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+  }
+  :global(html[data-mode='clean']) .cf-kv { font-size: 12px; }
 </style>

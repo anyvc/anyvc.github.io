@@ -1,15 +1,29 @@
-// Custom reticle ring around the cursor. Fine pointers only, never under reduced motion. The native cursor is never hidden.
-if (matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const r = document.createElement('div');
-  r.className = 'w-reticle'; r.setAttribute('aria-hidden', 'true');
-  document.body.append(r);
-  let x = 0, y = 0, raf = 0;
-  const paint = () => { raf = 0; r.style.transform = `translate3d(${x}px, ${y}px, 0)`; };
+// Custom crosshair reticle with coordinate/status readout inside the hero (Watcher mode, fine mouse pointers).
+const ret = document.getElementById('ret');
+const rl = ret?.querySelector('b');
+const root = document.documentElement;
+
+if (ret && rl && matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   addEventListener('pointermove', e => {
-    if (e.pointerType === 'touch') return;
-    x = e.clientX; y = e.clientY; r.setAttribute('data-on', '');
-    r.toggleAttribute('data-hot', !!(e.target as HTMLElement).closest?.('a, button, summary, [role="button"]'));
-    if (!raf) raf = requestAnimationFrame(paint);
+    if (root.dataset.mode === 'clean') {
+      ret.style.opacity = '0';
+      return;
+    }
+    const t = (e.target instanceof Element ? e.target : (e.target as Node)?.parentElement) as HTMLElement | null;
+    const inH = !!t?.closest('.hero');
+    const c = t?.closest('.cov-card');
+    const a = t?.closest('a, button, summary');
+    ret.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+    ret.classList.toggle('lock', !!(c || a));
+    rl.textContent = c
+      ? (c.querySelector('.st')?.textContent ?? '')
+      : a
+        ? 'open'
+        : `${Math.round(e.clientX)} / ${Math.round(e.clientY)}`;
+    ret.style.opacity = e.pointerType === 'mouse' && inH && !a ? '1' : '0';
   }, { passive: true });
-  document.addEventListener('pointerleave', () => r.removeAttribute('data-on'));
+
+  document.documentElement.addEventListener('pointerleave', () => {
+    ret.style.opacity = '0';
+  });
 }

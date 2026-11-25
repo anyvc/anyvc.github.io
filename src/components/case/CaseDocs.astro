@@ -1,22 +1,49 @@
 ---
-import site from '../../data/site.json';
-import Redact from '../site/Redact.astro';
 const { docs } = Astro.props;
-const w = site.caseIntro.withheld;
 ---
-<section class="sec" id="sec-docs" data-sec aria-labelledby="h-docs">
+<section class="cf-blk" id="sec-docs" data-sec aria-labelledby="h-docs">
   <h2 id="h-docs">Documents</h2>
-  <ul>
-    {docs.map((d: { label: string; href: string | null }) => (
-      <li><span>{d.label}</span>{d.href
-        ? <a href={d.href} target="_blank" rel="noopener" aria-label={`Open ${d.label}`}>Open</a>
-        : <span class="soon">Coming soon</span>}</li>
-    ))}
-  </ul>
+  {docs.map((d: { label: string; href: string | null }) => (
+    <div class="cf-doc">
+      <span><b>{d.label}</b></span>
+      {d.href ? (
+        <a href={d.href} target="_blank" rel="noopener" aria-label={`Open ${d.label}`}>Open →</a>
+      ) : (
+        <span class="soon">Coming soon</span>
+      )}
+    </div>
+  ))}
 </section>
+
 <style>
-  .sec { margin-bottom: 2.5rem; }
-  ul { list-style: none; margin: 0; padding: 0; }
-  li { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px dashed var(--color-line); font-family: var(--font-mono); font-size: .9rem; }
-  .soon { color: var(--color-muted); }
+  .cf-blk { padding: 36px 0; border-top: 1px solid var(--color-line); scroll-margin-top: 88px; }
+  h2 {
+    font: 900 clamp(1.3rem, 2.8vw, 1.9rem)/1.1 var(--font-display);
+    letter-spacing: -.01em;
+    color: var(--color-text);
+    margin: 0 0 14px;
+  }
+  .cf-doc {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--color-line);
+  }
+  .cf-doc a { font-weight: 600; color: var(--color-warn); }
+  .cf-doc a:hover { color: var(--color-text); }
+  .soon {
+    border: 1px dashed var(--color-line);
+    padding: 4px 10px;
+    font: 400 .75rem var(--font-mono);
+    color: var(--color-muted);
+  }
+
+  :global(html[data-mode='clean']) h2 {
+    font: 700 clamp(1.5rem, 3vw, 1.9rem)/1.15 var(--font-display);
+    letter-spacing: -.03em;
+  }
+  :global(html[data-mode='clean']) .cf-doc a { color: var(--color-accent); }
+  :global(html[data-mode='clean']) .soon { border-radius: 999px; font-family: var(--font-body); }
 </style>

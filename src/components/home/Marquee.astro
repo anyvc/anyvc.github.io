@@ -1,22 +1,82 @@
 ---
 import site from '../../data/site.json';
+const { variant = 'top' } = Astro.props;
 const [a, b] = site.marquees;
-const run = (t: string) => Array.from({ length: 8 }, () => t).join('   ');
+const bottom = site.bottomMarquee;
+const repeat = (t: string, n = 6) => Array.from({ length: n }, () => t).join('\u00a0\u00a0\u00a0');
 ---
-<div class="marquees w-only-watcher w-noprint" aria-hidden="true">
-  <div class="band one"><div class="track">{run(a)}   {run(a)}</div></div>
-  <div class="band two"><div class="track rev">{run(b)}   {run(b)}</div></div>
-</div>
+{variant === 'top' ? (
+  <div class="mq-top w-only-watcher w-noprint" aria-hidden="true">
+    <div class="mq"><div>{repeat(a, 4)}&nbsp;&nbsp;&nbsp;{repeat(a, 4)}</div></div>
+    <div class="mq rev"><div>{repeat(b, 6)}&nbsp;&nbsp;&nbsp;{repeat(b, 6)}</div></div>
+  </div>
+) : (
+  <div class="mqgroup w-only-watcher w-noprint" id="mqg" aria-hidden="true">
+    <div class="mqd"></div>
+    <div class="mq"><div>{repeat(bottom, 4)}&nbsp;&nbsp;&nbsp;{repeat(bottom, 4)}</div></div>
+  </div>
+)}
+
 <style>
-  .marquees { overflow: hidden; padding-block: 1.5rem; }
-  .band { overflow: hidden; white-space: nowrap; border-block: 1px solid var(--color-line); }
-  .one { background: var(--deco-band-one); transform: rotate(-1.2deg) scale(1.04); }
-  .two { background: var(--color-tint); transform: rotate(1deg) scale(1.04); margin-top: -.4rem; }
-  .track { display: inline-block; font-family: var(--font-display); font-weight: 900; line-height: 1.2; animation: scroll 40s linear infinite; }
-  .one .track { font-size: clamp(2.2rem, 7vw, 5rem); color: transparent; -webkit-text-stroke: 1.5px var(--color-accent); }
-  .two .track { font-size: clamp(1.5rem, 4vw, 2.8rem); color: var(--deco-band-text); animation-direction: reverse; animation-duration: 48s; }
-  @keyframes scroll { to { transform: translateX(-50%); } }
-  /* Motion off: reduced motion, coarse pointers, and the Lite variant (set in stage 7). */
-  @media (prefers-reduced-motion: reduce), (pointer: coarse) { .track { animation: none; } }
-  :global(html[data-fx='lite']) .track { animation: none; }
+  .mq-top {
+    overflow: hidden;
+    margin-top: -48px;
+    position: relative;
+    z-index: 2;
+  }
+  .mq {
+    border-block: 1px solid var(--color-line);
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--deco-band-one);
+    transform: rotate(-1.4deg) scale(1.04);
+    margin: 40px 0;
+  }
+  .mq-top .mq:first-child { margin-top: 24px; }
+  .mq div {
+    display: inline-block;
+    animation: mq-scroll 24s linear infinite;
+    font: 900 clamp(3rem, 9vw, 6.5rem)/1.2 var(--font-display);
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-accent);
+  }
+  .mq.rev {
+    background: var(--color-tint);
+    border-top: 0;
+    transform: rotate(1.1deg) scale(1.04);
+    margin: -22px 0 40px;
+    position: relative;
+    z-index: 1;
+  }
+  .mq.rev div {
+    color: var(--deco-band-text);
+    -webkit-text-stroke: 0;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    animation-direction: reverse;
+    animation-duration: 30s;
+  }
+  @keyframes mq-scroll { to { transform: translateX(-50%); } }
+
+  .mqgroup {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-bottom: 16px;
+  }
+  .mqd {
+    position: relative;
+    z-index: -1;
+    height: 150px;
+    margin: 0 0 -70px;
+    pointer-events: none;
+    opacity: .55;
+    background: radial-gradient(circle, rgba(225, 6, 0, .55) 1px, transparent 1.7px) 0 0 / 7px 7px;
+    -webkit-mask-image: linear-gradient(0deg, #000, transparent);
+    mask-image: linear-gradient(0deg, #000, transparent);
+    transform: rotate(-1.4deg) scale(1.04);
+    transform-origin: 50% 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mq div { animation: none; }
+  }
 </style>

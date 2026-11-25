@@ -1,16 +1,52 @@
 ---
 const { kpis } = Astro.props;
 ---
-<ul class="kpis" aria-label="Key numbers">
+<div class="cf-kpis" style={`--n:${kpis.length}`} aria-label="Key numbers">
   {kpis.map((k: { n: string; label: string }) => (
-    <li class="w-card kpi"><p class="w-num">{k.n}</p><p class="kl">{k.label}</p></li>
+    <div>
+      <div class="cf-num">{k.n}</div>
+      <p class="cf-kl">{k.label}</p>
+    </div>
   ))}
-</ul>
+</div>
+
 <style>
-  .kpis { list-style: none; padding: 0; margin: 2rem 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-  .kpi { padding: 1.1rem 1rem; }
-  .kpi p { margin: 0; }
-  .kpi :global(.w-num) { font-size: clamp(1.5rem, 4vw, 2.25rem); overflow-wrap: anywhere; }
-  .kl { margin-top: .6rem !important; font: 400 .8rem/1.45 var(--font-mono); color: var(--color-muted); }
-  @media (max-width: 40rem) { .kpis { grid-template-columns: 1fr; } }
+  .cf-kpis {
+    display: grid;
+    grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+    border: 1px solid rgba(225, 6, 0, .5);
+    border-top: 3px solid var(--color-accent);
+    background: radial-gradient(circle at 100% 0, rgba(225, 6, 0, .16), transparent 55%), rgba(30, 0, 0, .4);
+    margin: 0 0 56px;
+  }
+  .cf-kpis > div { padding: 24px; }
+  .cf-kpis > div + div { border-left: 1px solid var(--color-line); }
+  .cf-num {
+    font: 900 clamp(2rem, 4.4vw, 3.2rem)/1 var(--font-display);
+    color: var(--color-text);
+  }
+  .cf-kl {
+    font: 400 13px/1.5 var(--font-mono);
+    color: var(--color-muted);
+    margin: 8px 0 0;
+  }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) .cf-kpis {
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  :global(html[data-mode='clean']) .cf-kpis > div + div { border-left-color: var(--color-line); }
+  :global(html[data-mode='clean']) .cf-num {
+    font: 800 2.5rem/1 var(--font-display);
+    letter-spacing: -.04em;
+    color: var(--color-accent);
+  }
+  :global(html[data-mode='clean']) .cf-kl { font-size: 12px; }
+
+  @media (max-width: 640px) {
+    .cf-kpis { grid-template-columns: 1fr; }
+    .cf-kpis > div + div { border-left: 0; border-top: 1px solid var(--color-line); }
+  }
 </style>

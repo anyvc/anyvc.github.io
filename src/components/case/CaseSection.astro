@@ -1,13 +1,44 @@
 ---
 import { fmt } from '../../lib/format';
-const { id, title, paras = [] } = Astro.props;
+const { id, title, paras = [], first = false } = Astro.props;
 ---
-<section class="sec" id={`sec-${id}`} data-sec aria-labelledby={`h-${id}`}>
+<section class:list={['cf-blk', { first }]} id={`sec-${id}`} data-sec aria-labelledby={`h-${id}`}>
   <h2 id={`h-${id}`}>{title}</h2>
   {paras.map((p: string) => <p set:html={fmt(p)} />)}
   <slot />
 </section>
+
 <style>
-  .sec { margin-bottom: 2.5rem; }
-  .sec :global(p code) { padding: .05em .3em; background: var(--color-tint); border-radius: 2px; }
+  .cf-blk {
+    padding: 36px 0;
+    border-top: 1px solid var(--color-line);
+    scroll-margin-top: 88px;
+  }
+  .cf-blk.first { border-top: 0; padding-top: 0; }
+  h2 {
+    font: 900 clamp(1.3rem, 2.8vw, 1.9rem)/1.1 var(--font-display);
+    letter-spacing: -.01em;
+    color: var(--color-text);
+    margin: 0 0 14px;
+  }
+  p { margin: 0 0 12px; max-width: 640px; color: var(--color-text); }
+  .cf-blk :global(p code) {
+    font: 400 .88em var(--font-mono);
+    background: rgba(225, 6, 0, .14);
+    color: var(--color-text);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) .cf-blk { border-top-color: var(--color-line); }
+  :global(html[data-mode='clean']) h2 {
+    font: 700 clamp(1.5rem, 3vw, 1.9rem)/1.15 var(--font-display);
+    letter-spacing: -.03em;
+  }
+  :global(html[data-mode='clean']) .cf-blk :global(p code) {
+    background: #F3F4F6;
+    border: 1px solid var(--color-line);
+    color: #111827;
+  }
 </style>

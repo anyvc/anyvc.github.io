@@ -3,15 +3,16 @@
     "id": "ex-01",
     "cat": "lab",
     "tag": "Telemetry",
-    "src": null,
+    "src": "/img/ex-01-wazuh-bruteforce.webp",
     "caption": "Wazuh dashboard: rule 60204 alerts from the SMB brute force",
-    "alt": "Wazuh dashboard: rule 60204 alerts from the SMB brute force"
+    "alt": "Wazuh Threat Hunting dashboard showing rule 60204 level 10 alert for Multiple Windows Logon Failures and rule 60122 logon failures"
   },
   {
     "id": "ex-02",
     "cat": "lab",
     "tag": "Lab",
     "src": null,
+    "hidden": true,
     "caption": "Azure and VMware lab topology: Kali, Windows 10, Wazuh manager",
     "alt": "Azure and VMware lab topology: Kali, Windows 10, Wazuh manager"
   },
@@ -19,31 +20,32 @@
     "id": "ex-03",
     "cat": "lab",
     "tag": "Telemetry",
-    "src": null,
-    "caption": "Detection coverage matrix mapped to MITRE ATT&CK",
-    "alt": "Detection coverage matrix mapped to MITRE ATT&CK"
+    "src": "/img/ex-03-wazuh-coverage.webp",
+    "caption": "Wazuh coverage analysis: Atomic Red Team T1082-1 System Information Discovery",
+    "alt": "Windows PowerShell output executing Atomic Red Team test T1082-1 System Information Discovery on the Windows 10 Wazuh agent"
   },
   {
     "id": "ex-04",
     "cat": "lab",
     "tag": "Lab",
-    "src": null,
+    "src": "/img/ex-04-active-response.webp",
     "caption": "Active response blocking the attacker at the Windows firewall",
-    "alt": "Active response blocking the attacker at the Windows firewall"
+    "alt": "Windows PowerShell output showing the WazuhBlock inbound Windows Firewall block rule created by the active-response script"
   },
   {
     "id": "ex-05",
     "cat": "events",
     "tag": "Event",
-    "src": null,
-    "caption": "MBC Lab 2026 Cybersecurity Division",
-    "alt": "MBC Lab 2026 Cybersecurity Division"
+    "src": "/img/ex-05-first-meet.webp",
+    "caption": "First Meet — MBC Lab 2026 Cybersecurity Division",
+    "alt": "Group photo from the First Meet of the Cybersecurity Division interns at MBC Lab"
   },
   {
     "id": "ex-06",
     "cat": "events",
     "tag": "Certificate",
     "src": null,
+    "hidden": true,
     "caption": "Certificate: add your credential here",
     "alt": "Certificate: add your credential here"
   },
@@ -51,15 +53,16 @@
     "id": "ex-07",
     "cat": "lab",
     "tag": "Lab",
-    "src": null,
+    "src": "/img/ex-07-ztna-policy.webp",
     "caption": "Zero Trust lab: Keycloak and OpenZiti policies",
-    "alt": "Zero Trust lab: Keycloak and OpenZiti policies"
+    "alt": "Terminal output of ziti edge list services and ziti edge list service-policies showing Dial and Bind policies for ssh, db, and webapp services"
   },
   {
     "id": "ex-08",
     "cat": "events",
     "tag": "Event",
     "src": null,
+    "hidden": true,
     "caption": "Event photo: workshop or competition",
     "alt": "Event photo: workshop or competition"
   }

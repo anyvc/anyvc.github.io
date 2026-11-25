@@ -1,94 +1,442 @@
 ---
 import data from '../../data/coverage.json';
-import { totals, total, headline, byTactic, LABEL, ORDER } from '../../lib/coverage';
-import EyeIcon from '../site/EyeIcon.astro';
-const legend = ORDER.map(s => ({ s, label: LABEL[s], n: totals[s] }));
+import { items, totals, total, byTactic, LABEL, ORDER } from '../../lib/coverage';
+import { coverageEyeSvg } from '../../lib/eyeSvg';
+import { fmtTid } from '../../lib/format';
+
+const groups = ORDER.map(k => ({
+  k,
+  label: LABEL[k],
+  segs: items.filter(it => it.status === k),
+}));
+const tableRows = byTactic.flatMap(col =>
+  col.items.map(it => ({ ...it, tactic: col.tactic, statusLabel: LABEL[it.status as keyof typeof LABEL] })),
+);
 ---
-<section id="coverage" class="cov" aria-labelledby="cov-h">
+<section id="coverage" class="w-sec w-ecg w-dots-bottom cov-sec" aria-labelledby="cov-h">
   <div class="w-wrap">
     <h2 id="cov-h">Detection coverage</h2>
+
     <div class="score">
-      <p class="w-num">{totals.d}/{total}</p>
-      <p class="score-t">detected out of {headline}. {totals.f} never ran and {totals.n} had no Windows test, so they say nothing about detection.</p>
+      {totals.d}/{total}<small>detected out of {total} techniques tested in the Wazuh lab. Only {totals.d + totals.m} ran as real detection checks ({totals.d} detected, {totals.m} not); {totals.f} never ran and {totals.n} had no Windows test.</small>
     </div>
-    <div class="bar" aria-hidden="true">{legend.map(l => <i class="seg" data-status={l.s} style={`flex-grow:${l.n};background:var(--status-${l.s})`}></i>)}</div>
-    <div class="leg" role="group" aria-label="Highlight by status">
-      <button type="button" disabled aria-pressed="true" data-cov-filter="all">All {total}</button>
-      {legend.map(l => <button type="button" disabled aria-pressed="false" data-cov-filter={l.s}><EyeIcon status={l.s} decorative />{l.label} {l.n}</button>)}
-    </div>
-    <p class="w-sr" role="status" aria-live="polite" data-cov-status></p>
-    <p class="read">{data.reading}</p>
-    <div class="matrix">
-      {byTactic.map((col, i) => (
-        <section class="col" aria-labelledby={`tac-${i}`}>
-          <h3 class="th" id={`tac-${i}`}><span>{col.tactic}</span><em>{col.items.length}</em></h3>
-          <ul>
-            {col.items.map(it => (
-              <li class="w-card tech" data-status={it.status}>
-                <EyeIcon status={it.status} label={LABEL[it.status as keyof typeof LABEL]} />
-                <p class="tid">{it.id}</p>
-                <h4>{it.title}</h4>
-                <p class="st" aria-hidden="true">{LABEL[it.status as keyof typeof LABEL]}</p>
-                {it.note && <p class="note">{it.note}</p>}
-              </li>
+
+    <div class="bar" id="bar" role="group" aria-label="Filter detection coverage by status">
+      {groups.map(g => (
+        <button
+          type="button"
+          class={`grp ${g.k}`}
+          data-f={g.k}
+          aria-pressed="false"
+          style={`flex:${g.segs.length} 1 0`}
+        >
+          <span class="segs">
+            {g.segs.map(t => (
+              <i class={g.k} data-tid={t.id} style={`--k:${items.indexOf(t)}`}>{t.id}</i>
             ))}
-          </ul>
-        </section>
+          </span>
+          <b>{g.label} {g.segs.length}</b>
+        </button>
       ))}
     </div>
-    <p class="cap">{data.legendCaption}</p>
-    <details class="tele">
-      <summary>{data.telemetryToggle}</summary>
-      <div class="tele-in">
-        <p class="tele-h w-mono">LAB-01 // WAZUH TELEMETRY <span class="stamp w-only-watcher" aria-hidden="true">ANALYSIS</span></p>
-        <ul>
-          {data.telemetry.map(t => (
-            <li>
-              <p class="tele-r"><span class="w-chip">{LABEL[t.status as keyof typeof LABEL]} {totals[t.status as keyof typeof totals]}/{total}</span> <b>{t.heading}</b></p>
-              <p>{t.body}</p>
-            </li>
+
+    <div class="leg" id="leg" aria-label="Mobile status filters">
+      {groups.map(g => (
+        <button type="button" data-f={g.k}><i class={g.k} aria-hidden="true"></i>{g.label} {g.segs.length}</button>
+      ))}
+    </div>
+    <p class="w-sr" role="status" aria-live="polite" data-cov-status></p>
+
+    <p class="read" set:html={fmtTid(data.reading)} />
+
+    <!-- Watcher 6-column ATT&CK matrix -->
+    <div class="cov-grid w-only-watcher" id="grid">
+      {byTactic.map(col => (
+        <div class="col">
+          <div class="th"><span>{col.tactic}</span><em>{col.items.length}</em></div>
+          {col.items.map(it => (
+            <div class="cov-card" data-k={it.status} data-tid={it.id}>
+              <Fragment set:html={coverageEyeSvg(it.status)} />
+              <div class="id">{it.id}</div>
+              <h4>{it.title}</h4>
+              <div class={`st ${it.status}`}>{LABEL[it.status as keyof typeof LABEL]}</div>
+              {it.note && <small>{it.note}</small>}
+            </div>
           ))}
-        </ul>
+        </div>
+      ))}
+    </div>
+
+    <!-- Clean editorial table -->
+    <div class="cl-cov w-only-clean">
+      <table class="cl-tbl">
+        <caption>Detection coverage by technique</caption>
+        <tbody>
+          {tableRows.map(r => (
+            <tr data-k={r.status} data-tid={r.id}>
+              <th scope="row"><b>{r.id}</b><span>{r.tactic}</span></th>
+              <td class="nm">{r.title}</td>
+              <td class="sc"><span class={`cl-st ${r.status}`}>{r.statusLabel}</span></td>
+              <td>{r.note ?? ''}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="cap">
+      <span class="w-only-watcher">{data.legendCaption}</span>
+      <span class="w-only-clean">Rows follow MITRE ATT&amp;CK tactics. Status labels: Detected, Not detected, Did not run (the test itself never ran) and Not applicable.</span>
+    </p>
+
+    <div class="lab-more">
+      <button type="button" class="lab-tg" id="labtg" aria-expanded="false" aria-controls="labpn">
+        <span class="w-only-watcher">[ + {data.telemetryToggle} ]</span>
+        <span class="w-only-clean">View Telemetry &amp; Failure Analysis</span>
+      </button>
+      <div class="lab-pn" id="labpn" role="region" aria-label="Lab telemetry and failure analysis">
+        <div class="lab-in">
+          <div class="lab-b">
+            <div class="dh"><span>LAB-01 // WAZUH TELEMETRY<span class="stamp">ANALYSIS</span></span></div>
+            <ul class="lab-l">
+              {data.telemetry.map(t => (
+                <li>
+                  <div class="lab-r">
+                    <span class={`st ${t.status}`}>{LABEL[t.status as keyof typeof LABEL]} {totals[t.status as keyof typeof totals]}/{total}</span>
+                    <b set:html={fmtTid(t.heading)} />
+                  </div>
+                  <p set:html={fmtTid(t.body)} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
-    </details>
+    </div>
   </div>
 </section>
+
 <script>import '../../scripts/coverage-filter';</script>
+
 <style>
-  .cov { padding-block: 3rem; }
-  @media print { .cov { background: none !important; } }
-  :global(html[data-mode='watcher']) .cov { background: linear-gradient(var(--color-bg), var(--deco-section-tint) 50%, var(--color-bg)); }
-  .score { display: flex; align-items: center; gap: 1.25rem; margin: 1rem 0 1.25rem; }
-  .score p { margin: 0; }
-  .score-t { max-width: 42ch; color: var(--color-muted); font-size: 1rem; line-height: 1.45; }
-  .bar { display: flex; gap: 3px; height: .6rem; margin-bottom: 1rem; }
-  .seg { flex-basis: 0; min-width: 0; border-radius: 1px; }
-  .leg { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
-  .leg button { display: inline-flex; align-items: center; gap: .5rem; font: 500 .8rem/1 var(--font-mono); padding: .5rem .8rem; cursor: pointer; color: var(--color-muted); background: transparent; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
-  .leg button:disabled { cursor: default; opacity: 1; }
-  .leg button[aria-pressed='true'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
-  .leg :global(.eye) { width: 1.6rem; }
-  .read { max-width: 62ch; }
-  .matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 1rem; margin: 1.5rem 0 1rem; align-items: start; }
-  .col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
-  .th { display: flex; justify-content: space-between; gap: .5rem; font: 500 .75rem/1.3 var(--font-mono); color: var(--color-muted); margin-bottom: .6rem; border-bottom: 1px dashed var(--color-line); padding-bottom: .4rem; }
-  .th em { font-style: normal; }
-  .tech { display: flex; flex-direction: column; gap: .35rem; padding: .9rem; }
-  .tech > * { margin: 0; }
-  .tech:hover { box-shadow: 0 0 0 1px var(--color-accent-text); } /* box-shadow only, never the border rules */
-  .tid { font: 500 .8rem/1.2 var(--font-mono); color: var(--color-accent-text); margin-top: .35rem !important; }
-  h4 { font: 600 1rem/1.3 var(--font-body); margin: 0; }
-  .st { font: 500 .75rem/1.3 var(--font-mono); color: var(--color-text); }
-  .note { font: 400 .75rem/1.45 var(--font-mono); color: var(--color-muted); }
-  .tech[data-dim], .seg[data-dim], .leg button[data-dim] { opacity: .3; }
-  .cap { font: 400 .8rem/1.5 var(--font-mono); color: var(--color-muted); max-width: 70ch; }
-  .tele { margin-top: 1.5rem; border: 1px solid var(--color-line); border-radius: var(--shape-radius); background: var(--color-surface); }
-  .tele summary { cursor: pointer; padding: .9rem 1rem; font: 500 .85rem/1.3 var(--font-mono); color: var(--color-accent-text); }
-  .tele-in { padding: 0 1rem 1rem; }
-  .tele-h { color: var(--color-muted); margin-bottom: .75rem; }
-  .stamp { margin-left: .6rem; padding: .15rem .45rem; border: 1px solid var(--color-accent); color: var(--color-accent-text); font-size: .7rem; }
-  .tele ul { list-style: none; margin: 0; padding: 0; }
-  .tele li { padding: .75rem 0; border-top: 1px dashed var(--color-line); }
-  .tele li p { margin: 0 0 .4rem; max-width: 70ch; font-size: .98rem; }
-  .tele-r { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+  .cov-sec {
+    background: linear-gradient(#060303, #140000 50%, #060303);
+    padding-bottom: 150px;
+  }
+  :global(html[data-mode='clean']) .cov-sec {
+    background: #fff;
+    padding-bottom: 72px;
+  }
+
+  .score {
+    font: 900 clamp(3rem, 10vw, 7rem)/1 var(--font-display);
+    margin: 0 0 14px;
+    letter-spacing: -.04em;
+  }
+  .score small {
+    font: 400 1.1rem/1.5 var(--font-body);
+    color: var(--color-muted);
+    letter-spacing: 0;
+    margin-left: 16px;
+  }
+  :global(html[data-mode='clean']) .score {
+    font: 800 2.5rem/1 var(--font-display);
+    letter-spacing: -.04em;
+    color: var(--color-danger);
+  }
+  :global(html[data-mode='clean']) .score small {
+    display: block;
+    margin: 10px 0 0;
+    font: 400 1rem/1.5 var(--font-body);
+  }
+
+  /* Interactive segmented bar */
+  .bar {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    margin: 0 0 8px;
+  }
+  .grp {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text);
+    text-align: left;
+    min-width: 0;
+    transition: opacity .3s;
+  }
+  .grp.off { opacity: .22; }
+  .grp .segs {
+    display: flex;
+    gap: 0;
+    height: 26px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .07);
+  }
+  .grp:not(:last-child) .segs { margin-right: -1px; }
+  .grp:first-child .segs { border-radius: 999px 0 0 999px; }
+  .grp:last-child .segs { border-radius: 0 999px 999px 0; }
+  .bar .segs i {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    font-size: 0;
+    border: 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .35);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .55s cubic-bezier(.2, .7, .2, 1);
+    transition-delay: calc(var(--k) * 170ms);
+  }
+  .bar.go .segs i { transform: scaleX(1); }
+  .bar .segs i.d { background: var(--color-accent); }
+  .bar .segs i.m,
+  .bar .segs i.f { background: none; box-shadow: none; }
+  .bar .segs i.n { background: rgba(255, 255, 255, .09); box-shadow: none; }
+  .grp.m .segs {
+    background-color: #240200;
+    background-image: linear-gradient(135deg, transparent 42%, #7a0600 42% 58%, transparent 58%);
+    background-size: 10px 10px;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1s cubic-bezier(.2, .7, .2, 1) .17s;
+  }
+  .grp.f .segs {
+    background-color: #150d05;
+    background-image: linear-gradient(135deg, transparent 42%, rgba(242, 165, 80, .65) 42% 58%, transparent 58%);
+    background-size: 10px 10px;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1s cubic-bezier(.2, .7, .2, 1) .68s;
+  }
+  .bar.go .grp.m .segs,
+  .bar.go .grp.f .segs { clip-path: inset(0 0 0 0); }
+  .bar .segs i.hl { background: rgba(255, 255, 255, .3) !important; }
+
+  .grp b {
+    display: block;
+    margin-top: 10px;
+    padding: 0 8px 0 2px;
+    font: 400 .8rem var(--font-mono);
+    white-space: nowrap;
+  }
+  .grp:last-child b { text-align: right; padding-right: 2px; margin-left: -70px; }
+  .grp.d b { color: var(--color-text); }
+  .grp.m b { color: #ff4a42; }
+  .grp.f b { color: var(--color-warn); }
+  .grp.n b { color: var(--color-muted); }
+  .grp[aria-pressed='true'] b { text-decoration: underline; text-underline-offset: 4px; }
+
+  /* Clean solid bar */
+  :global(html[data-mode='clean']) .bar .segs i { box-shadow: inset -1px 0 0 #fff; }
+  :global(html[data-mode='clean']) .bar .segs i.d,
+  :global(html[data-mode='clean']) .grp.d .segs { background: #1A1A1A !important; }
+  :global(html[data-mode='clean']) .bar .segs i.m,
+  :global(html[data-mode='clean']) .grp.m .segs { background: #C0392B !important; background-image: none !important; }
+  :global(html[data-mode='clean']) .bar .segs i.f,
+  :global(html[data-mode='clean']) .grp.f .segs { background: #E2B93B !important; background-image: none !important; }
+  :global(html[data-mode='clean']) .bar .segs i.n,
+  :global(html[data-mode='clean']) .grp.n .segs { background: #DAD7CF !important; }
+  :global(html[data-mode='clean']) .grp.d b { color: #18181B; }
+  :global(html[data-mode='clean']) .grp.m b { color: #B93A33; }
+  :global(html[data-mode='clean']) .grp.f b { color: #A06A00; }
+  :global(html[data-mode='clean']) .grp.n b { color: #6B6B66; }
+
+  /* Mobile legend */
+  .leg { display: none; }
+  .leg button {
+    background: none;
+    border: 0;
+    color: var(--color-text);
+    font: 400 .82rem var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
+    padding: 5px 0;
+    cursor: pointer;
+  }
+  .leg i { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+  .leg .d { background: var(--color-accent); }
+  .leg .m { background: #5a0a07; border: 1px solid #ff4a42; }
+  .leg .f { background: rgba(242, 165, 80, .35); border: 1px solid var(--color-warn); }
+  .leg .n { border: 1px dashed #777; }
+  :global(html[data-mode='clean']) .leg .d { background: #1A1A1A; border: 0; }
+  :global(html[data-mode='clean']) .leg .m { background: #C0392B; border: 0; }
+  :global(html[data-mode='clean']) .leg .f { background: #E2B93B; border: 0; }
+  :global(html[data-mode='clean']) .leg .n { background: #DAD7CF; border: 0; }
+
+  @media (max-width: 700px) {
+    .grp b { display: none; }
+    .leg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 8px 0 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar .segs i, .grp.m .segs, .grp.f .segs { transition: none; transform: none; clip-path: none !important; }
+  }
+
+  .read { max-width: 34em; margin: 18px 0 48px; font-size: 1.2rem; }
+  :global(html[data-mode='clean']) .read { font-size: 1.05rem; margin: 18px 0 28px; color: var(--color-text); }
+
+  /* Watcher 6-col matrix */
+  .cov-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) { .cov-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .cov-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .cov-grid { grid-template-columns: 1fr; } }
+
+  .col { display: grid; gap: 14px; align-content: start; }
+  .th {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font: 400 .78rem var(--font-mono);
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 0 4px 10px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .th em { font-style: normal; color: var(--color-muted); }
+
+  .cov-card {
+    padding: 22px 20px 26px;
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+    background: rgba(20, 0, 0, .5);
+    transition: opacity .3s, transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .cov-card.off { opacity: .18; }
+  .cov-card[data-k='d'] {
+    background: linear-gradient(180deg, rgba(225, 6, 0, .2), rgba(20, 0, 0, .55));
+    box-shadow: inset 0 4px 0 #ff2a22, 0 0 26px rgba(225, 6, 0, .28);
+  }
+  .cov-card[data-k='m'] { box-shadow: inset 0 3px 0 rgba(255, 74, 66, .32); }
+  .cov-card[data-k='f'] { box-shadow: inset 0 3px 0 var(--color-warn); }
+  .cov-card[data-k='n'] { box-shadow: inset 0 3px 0 #555; }
+  .cov-card:hover,
+  .cov-card.hl {
+    border-color: var(--color-text);
+    background: rgba(70, 0, 0, .55);
+  }
+  @media (hover: hover) {
+    .cov-card:hover { transform: translate(-3px, -3px); box-shadow: 6px 6px 0 rgba(225, 6, 0, .45); }
+  }
+  .cov-card :global(svg) { width: 64px; display: block; margin-bottom: 12px; }
+  .cov-card .id { font: 400 .85rem var(--font-mono); color: var(--color-muted); }
+  .cov-card h4 { font: 500 1rem/1.3 var(--font-body); margin: 4px 0 8px; }
+  .st { font-weight: 500; }
+  .st.d { color: var(--color-text); }
+  .st.m { color: #ff4a42; }
+  .st.f { color: var(--color-warn); }
+  .st.n { color: var(--color-muted); }
+  .cov-card small { display: block; color: var(--color-muted); font-size: .9rem; line-height: 1.4; margin-top: 6px; }
+
+  /* Clean editorial table */
+  .cl-cov { margin: 28px 0 8px; overflow-x: auto; }
+  .cl-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 640px; }
+  .cl-tbl caption { position: absolute; left: -9999px; }
+  .cl-tbl tr { border-top: 1px solid #DAD7CF; transition: opacity .15s; }
+  .cl-tbl tr:last-child { border-bottom: 1px solid #DAD7CF; }
+  .cl-tbl tr.off { opacity: .28; }
+  .cl-tbl th, .cl-tbl td {
+    padding: 15px 12px 15px 0;
+    text-align: left;
+    vertical-align: middle;
+    font: 400 14px/1.4 var(--font-body);
+    color: #52525B;
+  }
+  .cl-tbl th { width: 17%; font-weight: 400; }
+  .cl-tbl th b { display: block; font: 600 12px/1.3 var(--font-mono); color: #18181B; }
+  .cl-tbl th span { display: block; font: 400 10.5px/1.4 var(--font-mono); color: #6B6B66; margin-top: 2px; }
+  .cl-tbl td.nm { width: 34%; font-weight: 600; color: #18181B; font-size: 15px; }
+  .cl-tbl td.sc { width: 16%; }
+  .cl-st {
+    display: inline-block;
+    border-radius: 999px;
+    border: 1px solid;
+    padding: 3px 11px;
+    font: 500 11.5px/1.4 var(--font-body);
+    white-space: nowrap;
+  }
+  .cl-st.d { background: #1A1A1A; border-color: #1A1A1A; color: #fff; }
+  .cl-st.m { background: #FDF0EE; border-color: #E3A59F; color: #B93A33; }
+  .cl-st.f { background: #FBE9A6; border-color: #E3C45B; color: #6B5200; }
+  .cl-st.n { background: #EDEBE5; border-color: #D6D3CB; color: #6B6B66; }
+
+  @media (max-width: 600px) {
+    .cl-tbl { min-width: 0; }
+    .cl-tbl, .cl-tbl tbody, .cl-tbl tr, .cl-tbl th, .cl-tbl td { display: block; width: auto !important; }
+    .cl-tbl tr { padding: 14px 0; }
+    .cl-tbl th, .cl-tbl td { padding: 2px 0; }
+    .cl-tbl td.sc { margin: 6px 0; }
+    .cl-tbl td:empty { display: none; }
+  }
+
+  .cap { color: var(--color-muted); max-width: 44em; margin: 24px 0 0; font-size: 1rem; }
+
+  /* Telemetry expandable drawer */
+  .lab-more { margin: 26px 0 0; }
+  .lab-tg {
+    font: 400 .78rem var(--font-mono);
+    color: var(--color-text);
+    background: none;
+    border: 1px solid var(--color-accent);
+    padding: 10px 16px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .lab-tg:hover,
+  .lab-tg[aria-expanded='true'] { background: var(--color-accent); color: #fff; }
+  .lab-pn {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .35s cubic-bezier(.2, .7, .2, 1);
+  }
+  .lab-pn.on { grid-template-rows: 1fr; }
+  .lab-in { min-height: 0; overflow: hidden; }
+  .lab-b {
+    margin-top: 14px;
+    border: 1px solid var(--color-line);
+    border-left: 4px solid var(--color-accent);
+    background: #0a0404;
+    padding: 20px 26px 22px;
+  }
+  .lab-l { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 18px; }
+  .lab-l .lab-r { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .lab-l .st { font: 400 .66rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; border: 1px solid currentColor; padding: 2px 8px; }
+  .lab-l b { font: 600 .85rem var(--font-display); }
+  .lab-l p { margin: 6px 0 0; max-width: 46em; font-size: 1rem; color: var(--color-muted); }
+
+  :global(html[data-mode='clean']) .lab-tg {
+    background: #fff;
+    border-color: var(--color-line);
+    color: var(--color-text);
+    border-radius: 8px;
+    font: 600 .82rem var(--font-body);
+  }
+  :global(html[data-mode='clean']) .lab-tg:hover,
+  :global(html[data-mode='clean']) .lab-tg[aria-expanded='true'] {
+    background: #1C1B18;
+    color: #fff;
+    border-color: #1C1B18;
+  }
+  :global(html[data-mode='clean']) .lab-pn { transition: none; }
+  :global(html[data-mode='clean']) .lab-b {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 8px;
+  }
+  :global(html[data-mode='clean']) .lab-l .st { border-radius: 999px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+  :global(html[data-mode='clean']) .lab-l .st.d { color: #15803d; }
+  :global(html[data-mode='clean']) .lab-l .st.m { color: #C83E37; }
+  :global(html[data-mode='clean']) .lab-l .st.f { color: #b45309; }
+  :global(html[data-mode='clean']) .lab-l .st.n { color: #64748b; }
+  @media (prefers-reduced-motion: reduce) { .lab-pn { transition: none; } }
 </style>

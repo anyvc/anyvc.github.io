@@ -2,28 +2,151 @@
 import exp from '../../data/experience.json';
 import { fmt } from '../../lib/format';
 ---
-<section id="experience" class="w-wrap sec" aria-labelledby="exp-h">
-  <h2 id="exp-h">Experience</h2>
-  <ol class="tl">
-    {exp.map(e => (
-      <li class="item">
-        <p class="time">{e.time}</p>
-        <h3>{e.title}</h3>
-        <p class="org">{e.org}</p>
-        <ul>{e.points.map(p => <li set:html={fmt(p)} />)}</ul>
-      </li>
-    ))}
-  </ol>
+<section id="experience" class="w-sec" aria-labelledby="exp-h">
+  <div class="w-wrap">
+    <h2 id="exp-h">Experience</h2>
+    <ol class="xlist">
+      {exp.map((e, i) => (
+        <li class="xi">
+          <div class="xt">
+            <time data-n={`LOG-${String(i + 1).padStart(2, '0')}`}>{e.time}</time>
+            <div class="xh">
+              <h3>{e.title}</h3>
+              <p class="xo">{e.org}</p>
+            </div>
+          </div>
+          <ul class="xb">
+            {e.points.map(p => <li set:html={fmt(p)} />)}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  </div>
 </section>
+
 <style>
-  .sec { padding-block: 3rem; }
-  .tl { list-style: none; margin: 0; padding: 0; }
-  .item { padding: 0 0 2rem 1.25rem; border-left: 2px solid var(--color-line); position: relative; }
-  .item::before { content: ''; position: absolute; left: -6px; top: .35rem; width: 10px; height: 10px; border-radius: 50%; background: var(--color-accent); }
-  .item p { margin: 0; }
-  .time { font: 500 .8rem/1.3 var(--font-mono); color: var(--color-accent-text); }
-  h3 { margin: .35rem 0 .2rem; }
-  .org { font: 400 .85rem/1.5 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem !important; }
-  ul { margin: 0; padding-left: 1.1rem; max-width: 68ch; }
-  ul li { margin-bottom: .5rem; }
+  .xlist {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 32px;
+    border-left: 2px solid var(--color-accent);
+    display: grid;
+    gap: 36px;
+  }
+  .xi { position: relative; }
+  .xi::before {
+    content: '';
+    position: absolute;
+    left: -40px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    background: #050202;
+    border: 2px solid var(--color-accent);
+  }
+  .xt { display: block; }
+  .xt time {
+    display: block;
+    font: 400 .78rem var(--font-mono);
+    letter-spacing: .14em;
+    color: var(--color-danger);
+  }
+  .xt time::before { content: attr(data-n) ' // '; }
+  .xh h3 {
+    font: 900 clamp(1.2rem, 2.6vw, 1.6rem)/1.15 var(--font-display);
+    margin: 6px 0 4px;
+    letter-spacing: -.01em;
+  }
+  .xo {
+    margin: 0;
+    font: 400 .82rem/1.5 var(--font-mono);
+    color: var(--color-muted);
+    max-width: none;
+  }
+  .xb {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+  }
+  .xb li {
+    position: relative;
+    margin: 8px 0;
+    padding-left: 22px;
+    max-width: 46em;
+    line-height: 1.55;
+  }
+  .xb li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+  }
+  .xb :global(b) { font-weight: 700; color: #fff; }
+  .xb :global(a) { color: var(--color-text); }
+
+  /* Clean view editorial rows */
+  :global(html[data-mode='clean']) .xlist {
+    border-left: 0;
+    padding: 0;
+    gap: 0;
+    border-top: 1px solid var(--color-line);
+  }
+  :global(html[data-mode='clean']) .xi::before { display: none; }
+  :global(html[data-mode='clean']) .xi {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    column-gap: 32px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  :global(html[data-mode='clean']) .xt { display: contents; }
+  :global(html[data-mode='clean']) .xt time {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    font: 500 12px/1.6 var(--font-mono);
+    letter-spacing: .04em;
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .xt time::before { display: none; }
+  :global(html[data-mode='clean']) .xh { grid-column: 2; }
+  :global(html[data-mode='clean']) .xh h3 {
+    font: 700 1.2rem/1.25 var(--font-display);
+    letter-spacing: -.03em;
+    color: var(--color-text);
+    margin: 0 0 4px;
+  }
+  :global(html[data-mode='clean']) .xo {
+    font: 400 .92rem/1.5 var(--font-body);
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .xb { grid-column: 2; margin-top: 14px; }
+  :global(html[data-mode='clean']) .xb li {
+    font: 400 1rem/1.55 var(--font-body);
+    color: var(--color-text);
+    max-width: 44em;
+    padding-left: 18px;
+  }
+  :global(html[data-mode='clean']) .xb li::before {
+    content: '';
+    top: .65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+  :global(html[data-mode='clean']) .xb :global(b) { color: var(--color-text); }
+  :global(html[data-mode='clean']) .xb :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 700px) {
+    :global(html[data-mode='clean']) .xi { grid-template-columns: 1fr; }
+    :global(html[data-mode='clean']) .xt time,
+    :global(html[data-mode='clean']) .xh,
+    :global(html[data-mode='clean']) .xb { grid-column: 1; grid-row: auto; }
+    :global(html[data-mode='clean']) .xt time { margin-bottom: 6px; }
+  }
 </style>

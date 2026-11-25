@@ -1,26 +1,58 @@
 ---
 const { diagram: d } = Astro.props;
 ---
-<figure class="flow">
-  <figcaption>{d.label}</figcaption>
-  <ol>
-    {d.nodes.map((n: { title: string; sub?: string }, i: number) => (
-      <li class:list={['nd', { hot: i === d.hot }]}>
-        <span class="sg">Stage {String(i + 1).padStart(2, '0')}</span>
-        <b>{n.title}</b>{n.sub && <small>{n.sub}</small>}
-        {d.edges?.[i] && i < d.nodes.length - 1 && <span class="edge">{d.edges[i]}</span>}
-      </li>
-    ))}
-  </ol>
-</figure>
+<p class="cf-cap">{d.label}</p>
+<ol class="cf-chain">
+  {d.nodes.map((n: { title: string; sub?: string }) => (
+    <li>
+      <b>{n.title}</b>{n.sub && <> <span>{n.sub}</span></>}
+    </li>
+  ))}
+</ol>
+
 <style>
-  .flow { margin: 1.25rem 0; }
-  figcaption { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem; }
-  ol { list-style: none; margin: 0; padding: 0; }
-  .nd { display: flex; flex-direction: column; gap: .15rem; padding: .5rem 0 .9rem 1rem; border-left: 2px solid var(--color-line); }
-  .nd.hot { border-left-color: var(--color-accent); }
-  .sg { font: 500 .7rem/1 var(--font-mono); color: var(--color-muted); }
-  b { font-family: var(--font-body); font-weight: 600; }
-  small { font: 400 .8rem/1.4 var(--font-mono); color: var(--color-muted); }
-  .edge { font: 400 .75rem/1.4 var(--font-mono); color: var(--color-accent-text); }
+  .cf-cap {
+    font: 400 12px/1.5 var(--font-mono);
+    color: var(--color-muted);
+    margin: 20px 0 10px;
+  }
+  ol.cf-chain {
+    list-style: none;
+    counter-reset: c;
+    margin: 0 0 20px 11px;
+    padding: 0;
+    max-width: 640px;
+    border-left: 1px solid rgba(225, 6, 0, .4);
+  }
+  ol.cf-chain li {
+    counter-increment: c;
+    position: relative;
+    padding: 0 0 14px 24px;
+    color: var(--color-text);
+    margin: 0;
+  }
+  ol.cf-chain li::before {
+    content: counter(c);
+    position: absolute;
+    left: -11px;
+    top: 1px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-bg);
+    border: 1px solid var(--color-accent);
+    font: 500 11px/20px var(--font-mono);
+    text-align: center;
+    color: var(--color-accent);
+  }
+  ol.cf-chain li b { font-weight: 600; }
+  ol.cf-chain li span { color: var(--color-muted); font-size: 14px; }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) ol.cf-chain { border-left-color: var(--color-line); }
+  :global(html[data-mode='clean']) ol.cf-chain li::before {
+    background: #fff;
+    border-color: var(--color-line);
+    color: var(--color-muted);
+  }
 </style>

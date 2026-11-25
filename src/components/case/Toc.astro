@@ -1,21 +1,60 @@
 ---
 const { items } = Astro.props;
 ---
-<nav class="toc" aria-label="On this page" data-toc>
-  <p class="toch">On this page</p>
-  <ol>
-    {items.map((it: { id: string; t: string }, i: number) => (
-      <li><a href={`#${it.id}`}><span class="n w-only-watcher">{String(i + 1).padStart(2, '0')} //</span> <span class="t">{it.t}</span></a></li>
-    ))}
-  </ol>
+<nav class="cf-toc" aria-label="On this page" data-toc>
+  <span class="cf-toch">On this page</span>
+  {items.map((it: { id: string; t: string }, i: number) => (
+    <a href={`#${it.id}`}>
+      <span class="n w-only-watcher">{String(i + 1).padStart(2, '0')} // </span>{it.t}
+    </a>
+  ))}
 </nav>
 <script>import '../../scripts/toc';</script>
+
 <style>
-  .toch { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem; }
-  ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem 1rem; }
-  a { padding-block: .25rem; display: inline-block; font: 400 .85rem/1.4 var(--font-mono); color: var(--color-muted); text-decoration: none; }
-  a:hover, a[aria-current='true'] { color: var(--color-accent-text); }
-  .n { color: var(--color-accent-text); }
-  :global(html[data-mode='watcher']) .t { text-transform: uppercase; letter-spacing: .04em; }
-  @media (min-width: 60rem) { ol { flex-direction: column; gap: .55rem; } }
+  .cf-toc {
+    display: grid;
+    gap: 8px;
+  }
+  .cf-toch {
+    font: 400 .72rem var(--font-mono);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 2px;
+  }
+  .cf-toc a {
+    font: 400 .78rem/1.3 var(--font-mono);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .cf-toc a .n { color: var(--color-accent); }
+  .cf-toc a:hover,
+  .cf-toc a[aria-current='true'] { color: var(--color-text); }
+
+  /* Clean view */
+  :global(html[data-mode='clean']) .cf-toc { gap: 10px; }
+  :global(html[data-mode='clean']) .cf-toch {
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: .08em;
+    color: var(--color-accent);
+  }
+  :global(html[data-mode='clean']) .cf-toc a {
+    font: 400 14px/1.4 var(--font-body);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-muted);
+  }
+  :global(html[data-mode='clean']) .cf-toc a:hover,
+  :global(html[data-mode='clean']) .cf-toc a[aria-current='true'] {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 860px) {
+    .cf-toc { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+    .cf-toch { width: 100%; }
+  }
 </style>

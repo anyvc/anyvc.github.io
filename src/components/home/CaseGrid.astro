@@ -1,37 +1,176 @@
 ---
 import site from '../../data/site.json';
-import { getCases, counts, GROUPS } from '../../lib/cases';
+import { getCases, GROUPS } from '../../lib/cases';
+import { MASK_SVG, DOVE_FLOCK_HTML } from '../../lib/eyeSvg';
 import Withheld from '../site/Withheld.astro';
 import CaseCard from './CaseCard.astro';
 import CasePreview from './CasePreview.astro';
+
 const cases = await getCases();
-const n = counts(cases);
 ---
-<section id="case" class="w-wrap case-sec" aria-labelledby="case-h">
-  <h2 id="case-h">Case files</h2>
-  <p class="intro">
-    {site.caseIntro.text}<br />
-    <Withheld />
-  </p>
-  <div class="filters" role="group" aria-label="Filter case files" data-case-filters>
-    <button type="button" aria-pressed="true" data-filter="All">All {cases.length}</button>
-    {GROUPS.map(g => <button type="button" aria-pressed="false" data-filter={g}>{g} {n[g]}</button>)}
+<section id="case" class="w-sec w-dots-bottom" aria-labelledby="case-h">
+  <Fragment set:html={DOVE_FLOCK_HTML} />
+  <div class="w-wrap">
+    <h2 id="case-h">Case files</h2>
+    <div class="note">
+      <span class="w-only-watcher mask-wrap" aria-hidden="true" set:html={MASK_SVG} />
+      <p class="intro">
+        {site.caseIntro.text}<br />
+        <Withheld />
+      </p>
+    </div>
+
+    <div class="flt" id="flt" role="group" aria-label="Filter case files" data-case-filters>
+      <button type="button" data-filter="All" aria-pressed="true">All</button>
+      {GROUPS.map(g => (
+        <button type="button" data-filter={g} aria-pressed="false">{g}</button>
+      ))}
+    </div>
+    <p class="w-sr" role="status" aria-live="polite" data-case-status></p>
+
+    <div class="pgrid" id="pgrid" data-case-grid>
+      {cases.map((e, i) => <CaseCard entry={e} index={i} />)}
+    </div>
+    <CasePreview cases={cases} />
   </div>
-  <p class="w-sr" role="status" aria-live="polite" data-case-status></p>
-  <ul class="grid" data-case-grid>{cases.map(e => <CaseCard entry={e} />)}</ul>
-  <CasePreview cases={cases} />
 </section>
+
 <script>
   import '../../scripts/case-filter';
   import '../../scripts/case-preview';
 </script>
+
 <style>
-  .case-sec { padding-block: 3rem; }
-  .intro { font: 400 .9rem/1.8 var(--font-mono); color: var(--color-muted); max-width: 62ch; }
-  .filters { display: none; gap: .5rem; flex-wrap: wrap; margin: 0 0 1.5rem; }
-  :global(html.js) .filters { display: flex; } /* without JS the filters would do nothing, so they stay hidden */
-  .filters button { font: 500 .8rem/1 var(--font-mono); padding: .6rem .9rem; cursor: pointer; color: var(--color-muted); background: transparent; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
-  .filters button[aria-pressed='true'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
-  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr)); gap: 1rem; }
-  :global(.case-item[hidden]) { display: none !important; }
+  #case {
+    position: relative;
+    overflow-x: clip;
+    padding-bottom: 150px;
+  }
+  :global(html[data-mode='clean']) #case { padding-bottom: 72px; }
+
+  .note {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 0 0 26px;
+  }
+  .mask-wrap :global(.mask) {
+    width: 64px;
+    flex: none;
+    display: block;
+    transform: rotate(-6deg);
+    filter: drop-shadow(3px 3px 0 rgba(225, 6, 0, .5));
+  }
+  .intro {
+    font: 400 .85rem/1.7 var(--font-mono);
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .flt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 22px;
+  }
+  .flt button {
+    font: 400 .75rem var(--font-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: none;
+    color: var(--color-text);
+    border: 1px solid var(--color-line);
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .flt button:hover { border-color: var(--color-accent); }
+  .flt button[aria-pressed='true'] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+  :global(html[data-mode='clean']) .flt button {
+    border-radius: 8px;
+    border-color: var(--color-line);
+    background: #fff;
+    color: var(--color-text);
+    text-transform: none;
+    letter-spacing: 0;
+    font: 600 .8rem var(--font-body);
+  }
+  :global(html[data-mode='clean']) .flt button[aria-pressed='true'] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+
+  .pgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+  :global(html[data-mode='clean']) .pgrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  @media (max-width: 1020px) {
+    :global(html[data-mode='clean']) .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 700px) {
+    :global(html[data-mode='clean']) .pgrid { grid-template-columns: 1fr; }
+  }
+
+  /* Dove flock + staggered card reveal (Watcher mode) */
+  :global(#case .flock) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 620px;
+    pointer-events: none;
+    z-index: 6;
+  }
+  :global(#case .fd) {
+    position: absolute;
+    left: -150px;
+    width: 104px;
+    opacity: 0;
+    filter: drop-shadow(3px 3px 0 rgba(225, 6, 0, .45));
+  }
+  :global(#case .fd svg) { display: block; width: 100%; }
+  :global(#case .fd .wf) {
+    transform-origin: 0 0;
+    animation: w-wing .42s ease-in-out infinite alternate;
+  }
+  :global(#case:not(.go) .fd .wf) { animation-play-state: paused; }
+  @keyframes w-wing { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
+  :global(#case.go .fd) {
+    animation: w-fly var(--t) cubic-bezier(.4, 0, .3, 1) var(--d) 1 both;
+  }
+  @keyframes w-fly {
+    0% { opacity: 0; transform: translate(0, 0) rotate(-4deg) scale(var(--s)); }
+    8% { opacity: 1; }
+    50% { transform: translate(55vw, var(--y2)) rotate(2deg) scale(var(--s)); }
+    92% { opacity: 1; }
+    100% { opacity: 0; transform: translate(118vw, var(--y3)) rotate(-3deg) scale(var(--s)); }
+  }
+  :global(html[data-mode='watcher'] #case.rv .pc) {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity .7s ease, transform .7s ease, box-shadow .18s, border-color .18s;
+    transition-delay: calc(.4s + var(--r, 0) * .1s), calc(.4s + var(--r, 0) * .1s), 0s, 0s;
+  }
+  :global(html[data-mode='watcher'] #case.rv.go .pc) {
+    opacity: 1;
+    transform: none;
+  }
+  :global(html[data-mode='watcher'] #case.rv.go .pc:hover),
+  :global(html[data-mode='watcher'] #case.rv.go .pc[aria-expanded='true']) {
+    transition-delay: 0s;
+    transform: translate(-3px, -3px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(#case .fd) { display: none; }
+    :global(#case.rv .pc) { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
 </style>

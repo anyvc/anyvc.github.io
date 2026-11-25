@@ -10,14 +10,15 @@ import Experience from '../components/home/Experience.astro';
 import Gallery from '../components/home/Gallery.astro';
 import Contact from '../components/home/Contact.astro';
 ---
-<Base>
+<Base home={true}>
   <Hero />
-  <Marquee />
+  <Marquee variant="top" />
   <Highlights />
   <CaseGrid />
   <Coverage />
   <About />
   <Experience />
   <Gallery />
+  <Marquee variant="bottom" />
   <Contact />
 </Base>
