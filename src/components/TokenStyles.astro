@@ -1,0 +1,13 @@
+---
+import { watcher } from '../styles/tokens/watcher';
+import { clean } from '../styles/tokens/clean';
+import type { Tokens } from '../styles/tokens/types';
+const kebab = (s: string) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+const decl = (t: Tokens) => Object.entries(t).flatMap(([g, v]) =>
+  Object.entries(v).map(([k, val]) => `--${kebab(g)}-${kebab(k)}:${val};`)).join('');
+const css =
+  `html[data-mode="watcher"]{color-scheme:dark;${decl(watcher)}}` +
+  `html[data-mode="clean"]{color-scheme:light;${decl(clean)}}` +
+  `@media print{html[data-mode]{color-scheme:light;${decl(clean)}}}`; // print always uses Clean
+---
+<style is:inline set:html={css}></style>
