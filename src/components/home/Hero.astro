@@ -1,0 +1,55 @@
+---
+import site from '../../data/site.json';
+const { hero } = site;
+---
+<section class="hero" id="top" aria-labelledby="hero-h1">
+  <svg class="hero-eye w-only-watcher" data-eye="hero" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false">
+    <path d="M-190 0Q0-150 190 0Q0 150-190 0Z" fill="#1a0000" stroke="#e10600" stroke-width="6" />
+    <circle r="82" fill="#e10600" />
+    <circle r="36" fill="#060303" />
+    <circle cx="-26" cy="-26" r="11" fill="#efe7de" />
+  </svg>
+  <div class="w-wrap hero-in">
+    <p class="badge"><span class="dot" aria-hidden="true"></span>{hero.badge}</p>
+    <p class="wordmark"><span>Rayn</span> <span>Hanash</span> <span>Fasya</span></p>
+    <h1 id="hero-h1">{hero.headline}</h1>
+    <p class="sub">{hero.sub}</p>
+    <p class="actions">
+      {hero.buttons.map(b => (
+        <a class:list={['btn', { primary: b.primary }]} href={b.href} download={b.download ? '' : undefined}>
+          {b.label}{b.download ? ' (PDF)' : ''}
+        </a>
+      ))}
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; overflow: hidden; padding-block: clamp(2.5rem, 8vw, 6rem); }
+  .hero-in { position: relative; z-index: 1; }
+  .badge { display: inline-flex; align-items: center; gap: .6rem; font: 500 .8rem/1.3 var(--font-mono); color: var(--color-accent-text); margin: 0 0 1.5rem; padding: .4rem .7rem; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
+  .dot { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--color-accent); }
+  .wordmark { margin: 0 0 1.25rem; font-family: var(--font-display); font-weight: var(--font-display-weight); line-height: .9; overflow-wrap: anywhere; }
+  .wordmark span { display: block; }
+  .hero h1 { max-width: 19em; margin: 0 0 1rem; }
+  .sub { max-width: 40em; color: var(--color-muted); font-size: 1.1rem; margin-bottom: 1.75rem; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; max-width: none; margin: 0; }
+  .btn { display: inline-block; padding: .75rem 1.3rem; border: 1px solid var(--color-border); border-radius: var(--shape-radius); color: var(--color-text); text-decoration: none; font: 600 1rem/1.2 var(--font-mono); }
+  .btn:hover { border-color: var(--color-accent-text); color: var(--color-accent-text); }
+  .btn.primary { border-width: 2px; border-color: var(--color-accent); }
+
+  /* Watcher: name is the loud wordmark, positioning line stays readable body type. Primary button is an outline (red fill would fail small-text contrast). */
+  :global(html[data-mode='watcher']) .hero { background: radial-gradient(ellipse at 75% 45%, #5a0000 0, #1a0000 45%, var(--color-bg) 75%); }
+  :global(html[data-mode='watcher']) .wordmark { font-size: clamp(2.4rem, 12vw, 8rem); letter-spacing: -.04em; text-shadow: 5px 4px 0 var(--color-accent); }
+  :global(html[data-mode='watcher']) .hero h1 { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.4rem, 3vw, 2.1rem); line-height: 1.3; }
+  :global(html[data-mode='watcher']) .btn.primary:hover { background: var(--color-tint); }
+  .hero-eye { position: absolute; right: -12%; top: 50%; width: min(70vw, 34rem); transform: translateY(-50%); opacity: .45; }
+
+  /* Clean: the positioning line leads, the name is a small kicker. Primary is a solid blue fill with white text (6.7:1). */
+  :global(html[data-mode='clean']) .wordmark { font-size: 1rem; letter-spacing: 0; line-height: 1.3; color: var(--color-muted); margin-bottom: .75rem; }
+  :global(html[data-mode='clean']) .wordmark span { display: inline; }
+  :global(html[data-mode='clean']) .hero h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); letter-spacing: -.02em; }
+  :global(html[data-mode='clean']) .btn.primary { background: var(--color-accent); color: var(--color-on-accent); }
+  :global(html[data-mode='clean']) .btn.primary:hover { filter: brightness(.92); color: var(--color-on-accent); }
+  @media print { .hero { padding-block: 1rem; } .btn { border-color: #999; } }
+</style>

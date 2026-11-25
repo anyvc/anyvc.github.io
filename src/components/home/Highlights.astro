@@ -1,0 +1,33 @@
+---
+import hl from '../../data/highlights.json';
+---
+<section class="hl" id="highlights" aria-labelledby="hl-h">
+  <div class="w-wrap">
+    <h2 id="hl-h" class="w-sr">Highlights</h2>
+    <ul class="grid">
+      {hl.items.map(i => (
+        <li class="w-card item">
+          <p class="w-num">{i.n}</p>
+          <p class="label">{i.label}</p>
+          {(i.small || i.link) && (
+            <p class="small">
+              {i.small}
+              {i.link && <a href={i.link.href} target="_blank" rel="noopener">{i.link.label}</a>}
+            </p>
+          )}
+        </li>
+      ))}
+    </ul>
+    <p class="caption">{hl.caption}</p>
+  </div>
+</section>
+<style>
+  .hl { padding-block: 1rem 3rem; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .item { display: flex; flex-direction: column; gap: .6rem; padding: 1.4rem 1.25rem 1.1rem; }
+  .item p { margin: 0; }
+  .label { color: var(--color-muted); font-size: 1rem; line-height: 1.45; }
+  .small { margin-top: auto !important; padding-top: .6rem !important; border-top: 1px dashed var(--color-line); font: 400 .78rem/1.45 var(--font-mono); color: var(--color-muted); }
+  .caption { margin: 1rem 0 0; font: 400 .85rem/1.5 var(--font-mono); color: var(--color-muted); max-width: 60ch; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+</style>

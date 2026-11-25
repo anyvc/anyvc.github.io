@@ -1,19 +1,18 @@
 ---
-// STAGE 2 PREVIEW ONLY: proves tokens, fonts and the mode toggle. Stage 3 replaces this with the real hero and highlights.
 import Base from '../layouts/Base.astro';
-import site from '../data/site.json';
+import Hero from '../components/home/Hero.astro';
+import Marquee from '../components/home/Marquee.astro';
+import Highlights from '../components/home/Highlights.astro';
+const stubs = [['case', 'Case files', 4], ['coverage', 'Detection coverage', 5], ['about', 'About', 6], ['experience', 'Experience', 6], ['gallery', 'Gallery', 6], ['contact', 'Contact', 6]];
 ---
 <Base>
-  <div class="w-wrap preview">
-    <p class="w-chip">Stage 2 preview</p>
-    <h1>{site.hero.headline}</h1>
-    <p>{site.hero.sub}</p>
-    <div class="w-card">
-      <p class="w-num">3.4×</p>
-      <h3>Sample card</h3>
-      <p>Border, top border, radius and background all come from the active mode's tokens. <a href="#main">Sample link</a></p>
-      <p>Redaction sample: <span class="w-redact" role="img" aria-label="redacted" style="width:8ch"></span></p>
-    </div>
-  </div>
+  <Hero />
+  <Marquee />
+  <Highlights />
+  {/* Temporary anchors so nav and hero links resolve until their stages replace them. Delete each stub as its stage lands. */}
+  {stubs.map(([id, name, stage]) => (
+    <section id={id as string} data-stub class="w-wrap" style="padding-block:2.5rem">
+      <h2>{name}</h2><p class="w-mono">Stage {stage}</p>
+    </section>
+  ))}
 </Base>
-<style>.preview { padding-block: 3rem 5rem; }</style>
