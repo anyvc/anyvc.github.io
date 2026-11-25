@@ -12,6 +12,7 @@ export const clean: Tokens = {
     displayWeight: '800', numWeight: '800',
   },
   status: { d: '#1D4ED8', m: '#B42318', f: '#B45309', n: '#5C5A54', eyeFill: '#EAF0FE', slash: '#1C1B18' },
+  deco: { heroGlow: '#EAF0FE', heroMid: '#F5F7FE', sectionTint: '#FCFBF9', bandOne: '#1C1B18', bandText: '#FFFFFF', stripe: '#5C5A54' },
   shape: {
     radius: '8px',
     cardBorder: '1px solid #DCD9D0',

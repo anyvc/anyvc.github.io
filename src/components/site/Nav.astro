@@ -21,6 +21,7 @@ const href = (h: string) => (home ? h : '/' + h);
   .links a[aria-current] { color: var(--color-accent-text); }
   .brand { font-family: var(--font-display); font-weight: var(--font-display-weight); font-size: .95rem; color: var(--color-text); text-decoration: none; }
   .links { display: flex; gap: 1.1rem; overflow-x: auto; padding-bottom: .55rem; font-family: var(--font-mono); font-size: .8rem; scrollbar-width: none; }
+  :global(html[data-fx='lite']) .nav { backdrop-filter: none; }
   .links a { color: var(--color-muted); text-decoration: none; white-space: nowrap; padding-block: .25rem; }
   .links a:hover { color: var(--color-text); }
 </style>

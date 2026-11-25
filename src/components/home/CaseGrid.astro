@@ -1,18 +1,17 @@
 ---
 import site from '../../data/site.json';
 import { getCases, counts, GROUPS } from '../../lib/cases';
-import Redact from '../site/Redact.astro';
+import Withheld from '../site/Withheld.astro';
 import CaseCard from './CaseCard.astro';
 import CasePreview from './CasePreview.astro';
 const cases = await getCases();
 const n = counts(cases);
-const w = site.caseIntro.withheld;
 ---
 <section id="case" class="w-wrap case-sec" aria-labelledby="case-h">
   <h2 id="case-h">Case files</h2>
   <p class="intro">
     {site.caseIntro.text}<br />
-    Withheld on purpose: {w[0].label} <Redact width={w[0].width} />, {w[1].label} <Redact width={w[1].width} /> and {w[2].label} <Redact width={w[2].width} />.
+    <Withheld />
   </p>
   <div class="filters" role="group" aria-label="Filter case files" data-case-filters>
     <button type="button" aria-pressed="true" data-filter="All">All {cases.length}</button>

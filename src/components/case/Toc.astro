@@ -13,7 +13,7 @@ const { items } = Astro.props;
 <style>
   .toch { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem; }
   ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem 1rem; }
-  a { font: 400 .85rem/1.4 var(--font-mono); color: var(--color-muted); text-decoration: none; }
+  a { padding-block: .25rem; display: inline-block; font: 400 .85rem/1.4 var(--font-mono); color: var(--color-muted); text-decoration: none; }
   a:hover, a[aria-current='true'] { color: var(--color-accent-text); }
   .n { color: var(--color-accent-text); }
   :global(html[data-mode='watcher']) .t { text-transform: uppercase; letter-spacing: .04em; }

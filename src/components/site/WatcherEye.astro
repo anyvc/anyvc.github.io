@@ -7,17 +7,17 @@ const E = 'M-190 0Q0-150 190 0Q0 150-190 0Z';
 ---
 <svg class={`weye ${variant}`} data-eye={variant} data-range={range} viewBox="-200 -110 400 220" aria-hidden="true" focusable="false">
   <defs><clipPath id={`ec-${uid}`}><path d={E} /></clipPath></defs>
-  <path d={E} fill="#1a0000" />
+  <path d={E} fill="var(--status-eye-fill)" />
   <g clip-path={`url(#ec-${uid})`}>
     <g data-eye-ball>
-      <circle r="72" fill="#e10600" />
-      <circle r="31" fill="#060303" />
-      <circle cx="-22" cy="-24" r="9" fill="#efe7de" />
+      <circle r="72" fill="var(--color-accent)" />
+      <circle r="31" fill="var(--color-bg)" />
+      <circle cx="-22" cy="-24" r="9" fill="var(--color-text)" />
     </g>
-    {variant === 'outro' && <path class="lid" d={E} fill="#0d0505" />}
+    {variant === 'outro' && <path class="lid" d={E} fill="var(--color-surface)" />}
   </g>
-  <path d={E} fill="none" stroke="#e10600" stroke-width="7" stroke-linejoin="round" />
-  {variant === 'outro' && <path class="seam" d="M-190 0Q0 34 190 0" fill="none" stroke="#e10600" stroke-width="7" stroke-linecap="round" />}
+  <path d={E} fill="none" stroke="var(--color-accent)" stroke-width="7" stroke-linejoin="round" />
+  {variant === 'outro' && <path class="seam" d="M-190 0Q0 34 190 0" fill="none" stroke="var(--color-accent)" stroke-width="7" stroke-linecap="round" />}
 </svg>
 <style>
   .weye { display: block; width: 100%; height: auto; overflow: visible; }

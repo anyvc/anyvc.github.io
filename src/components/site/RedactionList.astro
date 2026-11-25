@@ -1,0 +1,5 @@
+---
+import Redact from './Redact.astro';
+const { items } = Astro.props; // [{ label, width }]
+---
+{items.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}

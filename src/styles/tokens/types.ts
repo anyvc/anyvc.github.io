@@ -9,5 +9,6 @@ export type Tokens = {
   };
   font: { display: string; body: string; mono: string; displayWeight: string; numWeight: string };
   status: { d: string; m: string; f: string; n: string; eyeFill: string; slash: string }; // coverage eye icons: graphics need >= 3:1 on surface
+  deco: { heroGlow: string; heroMid: string; sectionTint: string; bandOne: string; bandText: string; stripe: string }; // decorative backgrounds
   shape: { radius: string; cardBorder: string; cardTop: string; cardBg: string; numSize: string; numColor: string };
 };

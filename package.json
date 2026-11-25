@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "prebuild": "node scripts/check-secrets.mjs && node scripts/check-contrast.mjs && node scripts/check-images.mjs",
-    "build": "astro build && node scripts/check-seo.mjs",
+    "build": "astro build && node scripts/check-secrets.mjs dist && node scripts/check-seo.mjs",
     "preview": "astro preview",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:seo": "node scripts/check-seo.mjs"

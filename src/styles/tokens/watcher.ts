@@ -12,6 +12,7 @@ export const watcher: Tokens = {
     displayWeight: '900', numWeight: '900',
   },
   status: { d: '#e10600', m: '#e10600', f: '#f2a550', n: '#8d837c', eyeFill: '#1a0000', slash: '#ffffff' },
+  deco: { heroGlow: '#5a0000', heroMid: '#1a0000', sectionTint: '#140000', bandOne: '#000000', bandText: '#ff4a42', stripe: '#8a0000' },
   shape: {
     radius: '2px',
     cardBorder: '1px solid rgba(225,6,0,.5)',

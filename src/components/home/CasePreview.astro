@@ -1,5 +1,5 @@
 ---
-import Redact from '../site/Redact.astro';
+import RedactionList from '../site/RedactionList.astro';
 const { cases } = Astro.props;
 ---
 <dialog id="case-preview" class="pv" aria-label="Case preview">
@@ -15,7 +15,7 @@ const { cases } = Astro.props;
       <p class="pv-meta">{c.meta}{c.credit && <> · {c.credit}</>}</p>
       <p class="pv-tags">{c.tags.map((t: string) => <span class="w-chip">{t}</span>)}</p>
       {c.redactions && (
-        <p class="pv-meta">{c.redactions.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}</p>
+        <p class="pv-meta"><RedactionList items={c.redactions} /></p>
       )}
       <div class="pv-proof">
         <span class="pv-label">Proof of work</span>

@@ -1,5 +1,5 @@
 ---
-import Redact from '../site/Redact.astro';
+import RedactionList from '../site/RedactionList.astro';
 const { entry } = Astro.props;
 const c = entry.data;
 ---
@@ -11,7 +11,7 @@ const c = entry.data;
     <h3 class="case-title"><a href={`/case/${entry.id}/`} data-case-open={entry.id}>{c.title}</a></h3>
     <p class="case-sum">{c.summary}</p>
     {c.redactions && (
-      <p class="case-red">{c.redactions.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}</p>
+      <p class="case-red"><RedactionList items={c.redactions} /></p>
     )}
   </article>
 </li>

@@ -56,7 +56,8 @@ const legend = ORDER.map(s => ({ s, label: LABEL[s], n: totals[s] }));
 <script>import '../../scripts/coverage-filter';</script>
 <style>
   .cov { padding-block: 3rem; }
-  :global(html[data-mode='watcher']) .cov { background: linear-gradient(var(--color-bg), #140000 50%, var(--color-bg)); }
+  @media print { .cov { background: none !important; } }
+  :global(html[data-mode='watcher']) .cov { background: linear-gradient(var(--color-bg), var(--deco-section-tint) 50%, var(--color-bg)); }
   .score { display: flex; align-items: center; gap: 1.25rem; margin: 1rem 0 1.25rem; }
   .score p { margin: 0; }
   .score-t { max-width: 42ch; color: var(--color-muted); font-size: 1rem; line-height: 1.45; }

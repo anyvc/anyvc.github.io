@@ -1,0 +1,6 @@
+---
+import site from '../../data/site.json';
+import Redact from './Redact.astro';
+const w = site.caseIntro.withheld;
+---
+Withheld on purpose: {w.map((x, i) => (<>{i > 0 && (i === w.length - 1 ? ' and ' : ', ')}{x.label} <Redact width={x.width} /></>))}.
