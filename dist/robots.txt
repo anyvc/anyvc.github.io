@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://anyvc.github.io/sitemap.xml

@@ -24,7 +24,7 @@ const { cases } = Astro.props;
             ? <a class="pv-btn" href={d.href} target="_blank" rel="noopener">{d.label}</a>
             : <span class="pv-soon">{d.label}: coming soon</span>)}
           {e.id === 'wazuh-soc-lab' && <a class="pv-btn" href="#coverage" data-close>Jump to detection coverage</a>}
-          <a class="pv-btn pv-full" href={`/case/${e.id}`}>Read full case file</a>
+          <a class="pv-btn pv-full" href={`/case/${e.id}/`}>Read full case file</a>
         </div>
       </div>
     </template>

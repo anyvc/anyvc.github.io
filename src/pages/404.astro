@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCases } from '../lib/cases';
+const cases = await getCases();
+---
+<Base title="Not found – Rayn Hanash Fasya" description="This page does not exist." home={false} noindex>
+  <div class="w-wrap nf">
+    <p class="w-chip">404</p>
+    <h1>Nothing here.</h1>
+    <p>That address does not match a page on this site. These do:</p>
+    <ul>
+      <li><a href="/">Home</a></li>
+      {cases.map(e => <li><a href={`/case/${e.id}/`}>{e.data.title}</a></li>)}
+    </ul>
+  </div>
+</Base>
+<style>
+  .nf { padding-block: 4rem 6rem; }
+  ul { padding-left: 1.1rem; }
+  li { margin-bottom: .4rem; }
+</style>

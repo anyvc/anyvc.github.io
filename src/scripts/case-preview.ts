@@ -6,7 +6,7 @@ let opener: HTMLElement | null = null;
 
 function open(id: string, from: HTMLElement) {
   const t = document.querySelector<HTMLTemplateElement>(`template[data-preview="${id}"]`);
-  if (!dlg || !body || !t) { location.href = `/case/${id}`; return; } // fall back to the full page
+  if (!dlg || !body || !t) { location.href = `/case/${id}/`; return; } // fall back to the full page
   body.replaceChildren(t.content.cloneNode(true));
   if (cat) cat.textContent = t.dataset.cat ?? '';
   dlg.setAttribute('aria-label', t.dataset.title ?? 'Case preview');
