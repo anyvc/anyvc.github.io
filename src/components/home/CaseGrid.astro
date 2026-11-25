@@ -1,0 +1,38 @@
+---
+import site from '../../data/site.json';
+import { getCases, counts, GROUPS } from '../../lib/cases';
+import Redact from '../site/Redact.astro';
+import CaseCard from './CaseCard.astro';
+import CasePreview from './CasePreview.astro';
+const cases = await getCases();
+const n = counts(cases);
+const w = site.caseIntro.withheld;
+---
+<section id="case" class="w-wrap case-sec" aria-labelledby="case-h">
+  <h2 id="case-h">Case files</h2>
+  <p class="intro">
+    {site.caseIntro.text}<br />
+    Withheld on purpose: {w[0].label} <Redact width={w[0].width} />, {w[1].label} <Redact width={w[1].width} /> and {w[2].label} <Redact width={w[2].width} />.
+  </p>
+  <div class="filters" role="group" aria-label="Filter case files" data-case-filters>
+    <button type="button" aria-pressed="true" data-filter="All">All {cases.length}</button>
+    {GROUPS.map(g => <button type="button" aria-pressed="false" data-filter={g}>{g} {n[g]}</button>)}
+  </div>
+  <p class="w-sr" role="status" aria-live="polite" data-case-status></p>
+  <ul class="grid" data-case-grid>{cases.map(e => <CaseCard entry={e} />)}</ul>
+  <CasePreview cases={cases} />
+</section>
+<script>
+  import '../../scripts/case-filter';
+  import '../../scripts/case-preview';
+</script>
+<style>
+  .case-sec { padding-block: 3rem; }
+  .intro { font: 400 .9rem/1.8 var(--font-mono); color: var(--color-muted); max-width: 62ch; }
+  .filters { display: none; gap: .5rem; flex-wrap: wrap; margin: 0 0 1.5rem; }
+  :global(html.js) .filters { display: flex; } /* without JS the filters would do nothing, so they stay hidden */
+  .filters button { font: 500 .8rem/1 var(--font-mono); padding: .6rem .9rem; cursor: pointer; color: var(--color-muted); background: transparent; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
+  .filters button[aria-pressed='true'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr)); gap: 1rem; }
+  :global(.case-item[hidden]) { display: none !important; }
+</style>

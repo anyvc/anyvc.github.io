@@ -1,0 +1,31 @@
+---
+import Redact from '../site/Redact.astro';
+const { entry } = Astro.props;
+const c = entry.data;
+---
+<li class="case-item" data-group={c.group}>
+  <article class="w-card case" id={`card-${entry.id}`} data-case={entry.id}>
+    <span class="w-chip">{c.cat}</span>
+    <p class="w-num case-num">{c.card.n}{c.card.unit && <span class="case-unit">{c.card.unit}</span>}</p>
+    <p class="case-cap">{c.card.caption}</p>
+    <h3 class="case-title"><a href={`/case/${entry.id}`} data-case-open={entry.id}>{c.title}</a></h3>
+    <p class="case-sum">{c.summary}</p>
+    {c.redactions && (
+      <p class="case-red">{c.redactions.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}</p>
+    )}
+  </article>
+</li>
+<style>
+  .case { height: 100%; display: flex; flex-direction: column; gap: .55rem; cursor: pointer; }
+  .case:hover, .case:focus-within { box-shadow: 0 0 0 1px var(--color-accent-text); } /* box-shadow only: never touches the card border rules */
+  .case > * { margin: 0; }
+  .case .w-chip { align-self: flex-start; }
+  .case-num { margin-top: .4rem; }
+  .case-unit { margin-left: .4rem; font: 500 .8rem/1 var(--font-mono); color: var(--color-muted); }
+  .case-cap { color: var(--color-muted); font-size: .95rem; line-height: 1.4; }
+  .case-title { font-size: 1.2rem; margin-top: .6rem !important; }
+  .case-title a { color: var(--color-text); text-decoration: none; }
+  .case-title a:hover { text-decoration: underline; text-underline-offset: .2em; }
+  .case-sum { font-size: 1rem; line-height: 1.5; }
+  .case-red { margin-top: auto !important; padding-top: .5rem !important; font: 400 .78rem/1.6 var(--font-mono); color: var(--color-muted); }
+</style>

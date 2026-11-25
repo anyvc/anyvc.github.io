@@ -1,0 +1,51 @@
+---
+import Redact from '../site/Redact.astro';
+const { cases } = Astro.props;
+---
+<dialog id="case-preview" class="pv" aria-label="Case preview">
+  <div class="pv-bar"><span class="w-chip" data-pv-cat></span><button type="button" class="pv-x" data-close aria-label="Close preview">Close</button></div>
+  <div data-pv-body></div>
+</dialog>
+{cases.map((e: any) => {
+  const c = e.data;
+  return (
+    <template data-preview={e.id} data-cat={c.cat} data-title={c.title}>
+      <h2 class="pv-title">{c.title}</h2>
+      <p class="pv-sum">{c.summary}</p>
+      <p class="pv-meta">{c.meta}{c.credit && <> · {c.credit}</>}</p>
+      <p class="pv-tags">{c.tags.map((t: string) => <span class="w-chip">{t}</span>)}</p>
+      {c.redactions && (
+        <p class="pv-meta">{c.redactions.map((r: { label: string; width: number }, i: number) => (<>{i > 0 && ' · '}{r.label} <Redact width={r.width} /></>))}</p>
+      )}
+      <div class="pv-proof">
+        <span class="pv-label">Proof of work</span>
+        <div class="pv-links">
+          {c.docs.map((d: { label: string; href: string | null }) => d.href
+            ? <a class="pv-btn" href={d.href} target="_blank" rel="noopener">{d.label}</a>
+            : <span class="pv-soon">{d.label}: coming soon</span>)}
+          {e.id === 'wazuh-soc-lab' && <a class="pv-btn" href="#coverage" data-close>Jump to detection coverage</a>}
+          <a class="pv-btn pv-full" href={`/case/${e.id}`}>Read full case file</a>
+        </div>
+      </div>
+    </template>
+  );
+})}
+<style is:global>
+  .pv { width: min(42rem, 100% - 1.5rem); max-height: 88vh; overflow: auto; padding: 0; color: var(--color-text); background: var(--color-surface);
+    border: var(--shape-card-border); border-top: var(--shape-card-top); border-radius: var(--shape-radius); }
+  .pv::backdrop { background: rgba(0, 0, 0, .72); }
+  .pv-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .9rem 1.25rem 0; }
+  .pv [data-pv-body] { padding: .75rem 1.25rem 1.5rem; }
+  .pv-x, .pv-btn { font: 600 .85rem/1.2 var(--font-mono); padding: .6rem .9rem; color: var(--color-text); background: transparent; border: 1px solid var(--color-border); border-radius: var(--shape-radius); cursor: pointer; text-decoration: none; display: inline-block; }
+  .pv-x:hover, .pv-btn:hover { border-color: var(--color-accent-text); color: var(--color-accent-text); }
+  .pv-full { border-width: 2px; border-color: var(--color-accent); }
+  .pv-title { font-size: 1.6rem; }
+  .pv-meta { font: 400 .82rem/1.6 var(--font-mono); color: var(--color-muted); }
+  .pv-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1.25rem; }
+  .pv-proof { border-top: 1px dashed var(--color-line); padding-top: 1rem; }
+  .pv-label { display: block; font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); margin-bottom: .7rem; }
+  .pv-links { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .pv-soon { font: 400 .82rem/1.2 var(--font-mono); color: var(--color-muted); padding: .6rem 0; }
+  html[data-mode='clean'] .pv-full { background: var(--color-accent); color: var(--color-on-accent); }
+  html[data-mode='clean'] .pv-full:hover { color: var(--color-on-accent); filter: brightness(.92); }
+</style>
