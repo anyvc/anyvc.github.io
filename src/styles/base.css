@@ -30,4 +30,18 @@ code, .w-mono { font-family: var(--font-mono); font-size: .88em; }
 .w-redact { display: inline-block; height: 1em; vertical-align: -.12em; background: var(--color-text); border-radius: 1px; }
 html[data-mode='watcher'] .w-redact { background: repeating-linear-gradient(135deg, var(--color-text) 0 5px, #8a0000 5px 10px); } /* diagonal redaction bars */
 html[data-mode='watcher'] .w-only-clean, html[data-mode='clean'] .w-only-watcher { display: none !important; }
+/* Effects. Grain and scanlines are Watcher + full fx only; coarse pointers and reduced motion never get them. */
+.w-fx { display: none; position: fixed; inset: 0; z-index: 90; pointer-events: none; }
+html[data-mode='watcher'][data-fx='full'] .w-fx { display: block; }
+@media (pointer: coarse), (prefers-reduced-motion: reduce) { .w-fx { display: none !important; } }
+.w-grain { opacity: .07; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.w-scan { opacity: .5; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .12) 0 1px, transparent 1px 3px); }
+.w-reticle { position: fixed; left: 0; top: 0; z-index: 200; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 1.5px solid var(--color-accent); border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .2s, width .15s, height .15s, margin .15s; }
+.w-reticle::before, .w-reticle::after { content: ''; position: absolute; background: var(--color-accent); }
+.w-reticle::before { left: 50%; top: -6px; bottom: -6px; width: 1px; opacity: .5; }
+.w-reticle::after { top: 50%; left: -6px; right: -6px; height: 1px; opacity: .5; }
+.w-reticle[data-on] { opacity: .85; }
+.w-reticle[data-hot] { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+html[data-mode='clean'] .w-reticle { display: none; }
+@media print { .w-fx, .w-reticle { display: none !important; } }
 @media print { .w-noprint { display: none !important; } body { background: #fff; } }

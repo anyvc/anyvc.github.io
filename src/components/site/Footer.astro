@@ -1,15 +1,24 @@
 ---
 import site from '../../data/site.json';
+import WatcherEye from './WatcherEye.astro';
 const links = site.contact.links.filter(l => l.label !== 'CV');
 ---
 <footer class="ft">
+  <div class="w-wrap eyes w-only-watcher w-noprint" aria-hidden="true">
+    <div class="e"><WatcherEye variant="small" uid="f1" /></div><div class="e"><WatcherEye variant="small" uid="f2" /></div><div class="e"><WatcherEye variant="small" uid="f3" /></div><div class="e o"><WatcherEye variant="outro" uid="outro" /></div>
+  </div>
   <div class="w-wrap row">
     <p>© 2026 {site.name}</p>
     <nav aria-label="Footer">{links.map(l => <a href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined} rel={l.href.startsWith('http') ? 'noopener' : undefined}>{l.label}</a>)}<a href="#top">Back to top</a></nav>
   </div>
+  <span id="page-end" aria-hidden="true"></span>
 </footer>
 <style>
   .ft { border-top: 1px solid var(--color-line); padding-block: 1.5rem 2.5rem; font: 400 .85rem/1.5 var(--font-mono); color: var(--color-muted); }
+  .eyes { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .e { width: 4.5rem; }
+  .e.o { width: 7rem; margin-left: auto; }
+  #page-end { display: block; height: 1px; }
   .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem 1.5rem; }
   p { margin: 0; }
   nav { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; }
