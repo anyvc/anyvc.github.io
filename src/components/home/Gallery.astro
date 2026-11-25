@@ -1,0 +1,58 @@
+---
+import gallery from '../../data/gallery.json';
+// Items without a photo (src null) are placeholders: shown only in dev, hidden in production.
+const items = gallery.filter(g => g.src || import.meta.env.DEV);
+const url = (s: string) => (s.startsWith('/') || s.startsWith('http') ? s : '/' + s);
+const cats = [['all', 'All'], ['lab', 'Lab'], ['events', 'Events']];
+---
+{items.length > 0 && (
+  <section id="gallery" class="w-wrap sec" aria-labelledby="gal-h">
+    <h2 id="gal-h">Lab evidence</h2>
+    {import.meta.env.DEV && <p class="dev w-mono">Dev only: placeholders are hidden in production until a photo is added.</p>}
+    <div class="flt" role="group" aria-label="Filter gallery" data-gal-filters>
+      {cats.map(([k, l], i) => <button type="button" data-cat={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
+    </div>
+    <p class="w-sr" role="status" aria-live="polite" data-gal-status></p>
+    <ul class="grid" data-gal-grid>
+      {items.map(g => (
+        <li class="gi" data-cat={g.cat}>
+          <figure>
+            {g.src
+              ? <button type="button" class="gb" data-lb={url(g.src)} data-alt={g.alt} data-cap={g.caption}><img src={url(g.src)} alt={g.alt} loading="lazy" decoding="async" /></button>
+              : <div class="ph" role="img" aria-label={`Placeholder: ${g.caption}`}>Placeholder</div>}
+            <figcaption><span class="w-chip">{g.tag}</span> {g.caption}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+    <button type="button" class="more" data-gal-more hidden></button>
+    <dialog class="lb" data-lb-dialog aria-label="Image viewer">
+      <button type="button" class="lbx" data-lb-close>Close</button>
+      <img data-lb-img alt="" />
+      <p data-lb-cap></p>
+    </dialog>
+  </section>
+)}
+<script>import '../../scripts/gallery';</script>
+<style>
+  .sec { padding-block: 3rem; }
+  .dev { color: var(--color-muted); }
+  .flt { display: none; gap: .5rem; margin-bottom: 1.25rem; }
+  :global(html.js) .flt { display: flex; }
+  .flt button, .more, .lbx { font: 500 .8rem/1 var(--font-mono); padding: .6rem .9rem; cursor: pointer; color: var(--color-muted); background: transparent; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
+  .flt button[aria-pressed='true'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
+  .more { margin-top: 1.25rem; }
+  .more:hover, .lbx:hover { color: var(--color-accent-text); border-color: var(--color-accent-text); }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }
+  .gi[hidden] { display: none; }
+  figure { margin: 0; }
+  .gb, .ph { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--shape-radius); }
+  .gb { padding: 0; border: var(--shape-card-border); background: var(--color-surface); cursor: zoom-in; overflow: hidden; }
+  .gb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph { display: flex; align-items: center; justify-content: center; border: 1px dashed var(--color-border); color: var(--color-muted); font: 500 .8rem/1 var(--font-mono); background: var(--color-surface); }
+  figcaption { margin-top: .5rem; font: 400 .8rem/1.5 var(--font-mono); color: var(--color-muted); }
+  .lb { width: min(60rem, 100% - 1.5rem); max-height: 92vh; padding: 1rem; color: var(--color-text); background: var(--color-surface); border: var(--shape-card-border); border-radius: var(--shape-radius); }
+  .lb::backdrop { background: rgba(0, 0, 0, .85); }
+  .lb img { display: block; max-width: 100%; max-height: 70vh; margin: .75rem auto; }
+  .lb p { margin: 0; font: 400 .85rem/1.5 var(--font-mono); color: var(--color-muted); }
+</style>

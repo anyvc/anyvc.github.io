@@ -1,0 +1,22 @@
+---
+import site from '../../data/site.json';
+const { portrait, about } = site;
+const src = portrait ? (portrait.startsWith('/') ? portrait : '/' + portrait) : null;
+---
+<section id="about" class="w-wrap sec" aria-labelledby="about-h">
+  <h2 id="about-h">About</h2>
+  <div class="row">
+    <div class="txt">{about.text.map(p => <p>{p}</p>)}</div>
+    {src
+      ? <img class="ph-img" src={src} alt="Portrait of Rayn Hanash Fasya" width="400" height="500" loading="lazy" />
+      : <div class="ph" role="img" aria-label="Portrait placeholder: no photo added yet"><span>Portrait placeholder</span><small>Set <code>portrait</code> in site.json</small></div>}
+  </div>
+</section>
+<style>
+  .sec { padding-block: 3rem; }
+  .row { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .txt p { font-size: 1.15rem; }
+  .ph, .ph-img { width: min(100%, 16rem); aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--shape-radius); }
+  .ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem; text-align: center; border: 1px dashed var(--color-border); color: var(--color-muted); font: 500 .8rem/1.4 var(--font-mono); background: var(--color-surface); }
+  @media (min-width: 48rem) { .row { grid-template-columns: minmax(0, 1fr) auto; gap: 3rem; } }
+</style>

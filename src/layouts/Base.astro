@@ -3,6 +3,7 @@ import '../styles/fonts.css';
 import '../styles/base.css';
 import TokenStyles from '../components/TokenStyles.astro';
 import Nav from '../components/site/Nav.astro';
+import Footer from '../components/site/Footer.astro';
 import site from '../data/site.json';
 const { title = site.title, description = site.description, home = true } = Astro.props;
 const url = new URL(Astro.url.pathname, site.siteUrl).href;
@@ -43,6 +44,7 @@ const og = new URL(site.ogImage, site.siteUrl).href;
     <a class="w-skip" href="#main">Skip to content</a>
     <Nav home={home} />
     <main id="main"><slot /></main>
+    <Footer />
     <script>import '../scripts/mode';</script>
   </body>
 </html>

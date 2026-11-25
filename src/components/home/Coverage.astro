@@ -1,0 +1,93 @@
+---
+import data from '../../data/coverage.json';
+import { totals, total, headline, byTactic, LABEL, ORDER } from '../../lib/coverage';
+import EyeIcon from '../site/EyeIcon.astro';
+const legend = ORDER.map(s => ({ s, label: LABEL[s], n: totals[s] }));
+---
+<section id="coverage" class="cov" aria-labelledby="cov-h">
+  <div class="w-wrap">
+    <h2 id="cov-h">Detection coverage</h2>
+    <div class="score">
+      <p class="w-num">{totals.d}/{total}</p>
+      <p class="score-t">detected out of {headline}. {totals.f} never ran and {totals.n} had no Windows test, so they say nothing about detection.</p>
+    </div>
+    <div class="bar" aria-hidden="true">{legend.map(l => <i class="seg" data-status={l.s} style={`flex-grow:${l.n};background:var(--status-${l.s})`}></i>)}</div>
+    <div class="leg" role="group" aria-label="Highlight by status">
+      <button type="button" disabled aria-pressed="true" data-cov-filter="all">All {total}</button>
+      {legend.map(l => <button type="button" disabled aria-pressed="false" data-cov-filter={l.s}><EyeIcon status={l.s} decorative />{l.label} {l.n}</button>)}
+    </div>
+    <p class="w-sr" role="status" aria-live="polite" data-cov-status></p>
+    <p class="read">{data.reading}</p>
+    <div class="matrix">
+      {byTactic.map((col, i) => (
+        <section class="col" aria-labelledby={`tac-${i}`}>
+          <h3 class="th" id={`tac-${i}`}><span>{col.tactic}</span><em>{col.items.length}</em></h3>
+          <ul>
+            {col.items.map(it => (
+              <li class="w-card tech" data-status={it.status}>
+                <EyeIcon status={it.status} label={LABEL[it.status as keyof typeof LABEL]} />
+                <p class="tid">{it.id}</p>
+                <h4>{it.title}</h4>
+                <p class="st" aria-hidden="true">{LABEL[it.status as keyof typeof LABEL]}</p>
+                {it.note && <p class="note">{it.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+    <p class="cap">{data.legendCaption}</p>
+    <details class="tele">
+      <summary>{data.telemetryToggle}</summary>
+      <div class="tele-in">
+        <p class="tele-h w-mono">LAB-01 // WAZUH TELEMETRY <span class="stamp w-only-watcher" aria-hidden="true">ANALYSIS</span></p>
+        <ul>
+          {data.telemetry.map(t => (
+            <li>
+              <p class="tele-r"><span class="w-chip">{LABEL[t.status as keyof typeof LABEL]} {totals[t.status as keyof typeof totals]}/{total}</span> <b>{t.heading}</b></p>
+              <p>{t.body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  </div>
+</section>
+<script>import '../../scripts/coverage-filter';</script>
+<style>
+  .cov { padding-block: 3rem; }
+  :global(html[data-mode='watcher']) .cov { background: linear-gradient(var(--color-bg), #140000 50%, var(--color-bg)); }
+  .score { display: flex; align-items: center; gap: 1.25rem; margin: 1rem 0 1.25rem; }
+  .score p { margin: 0; }
+  .score-t { max-width: 42ch; color: var(--color-muted); font-size: 1rem; line-height: 1.45; }
+  .bar { display: flex; gap: 3px; height: .6rem; margin-bottom: 1rem; }
+  .seg { flex-basis: 0; min-width: 0; border-radius: 1px; }
+  .leg { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+  .leg button { display: inline-flex; align-items: center; gap: .5rem; font: 500 .8rem/1 var(--font-mono); padding: .5rem .8rem; cursor: pointer; color: var(--color-muted); background: transparent; border: 1px solid var(--color-line); border-radius: var(--shape-radius); }
+  .leg button:disabled { cursor: default; opacity: 1; }
+  .leg button[aria-pressed='true'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
+  .leg :global(.eye) { width: 1.6rem; }
+  .read { max-width: 62ch; }
+  .matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 1rem; margin: 1.5rem 0 1rem; align-items: start; }
+  .col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+  .th { display: flex; justify-content: space-between; gap: .5rem; font: 500 .75rem/1.3 var(--font-mono); color: var(--color-muted); margin-bottom: .6rem; border-bottom: 1px dashed var(--color-line); padding-bottom: .4rem; }
+  .th em { font-style: normal; }
+  .tech { display: flex; flex-direction: column; gap: .35rem; padding: .9rem; }
+  .tech > * { margin: 0; }
+  .tech:hover { box-shadow: 0 0 0 1px var(--color-accent-text); } /* box-shadow only, never the border rules */
+  .tid { font: 500 .8rem/1.2 var(--font-mono); color: var(--color-accent-text); margin-top: .35rem !important; }
+  h4 { font: 600 1rem/1.3 var(--font-body); margin: 0; }
+  .st { font: 500 .75rem/1.3 var(--font-mono); color: var(--color-text); }
+  .note { font: 400 .75rem/1.45 var(--font-mono); color: var(--color-muted); }
+  .tech[data-dim], .seg[data-dim], .leg button[data-dim] { opacity: .3; }
+  .cap { font: 400 .8rem/1.5 var(--font-mono); color: var(--color-muted); max-width: 70ch; }
+  .tele { margin-top: 1.5rem; border: 1px solid var(--color-line); border-radius: var(--shape-radius); background: var(--color-surface); }
+  .tele summary { cursor: pointer; padding: .9rem 1rem; font: 500 .85rem/1.3 var(--font-mono); color: var(--color-accent-text); }
+  .tele-in { padding: 0 1rem 1rem; }
+  .tele-h { color: var(--color-muted); margin-bottom: .75rem; }
+  .stamp { margin-left: .6rem; padding: .15rem .45rem; border: 1px solid var(--color-accent); color: var(--color-accent-text); font-size: .7rem; }
+  .tele ul { list-style: none; margin: 0; padding: 0; }
+  .tele li { padding: .75rem 0; border-top: 1px dashed var(--color-line); }
+  .tele li p { margin: 0 0 .4rem; max-width: 70ch; font-size: .98rem; }
+  .tele-r { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+</style>

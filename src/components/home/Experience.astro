@@ -1,0 +1,29 @@
+---
+import exp from '../../data/experience.json';
+import { fmt } from '../../lib/format';
+---
+<section id="experience" class="w-wrap sec" aria-labelledby="exp-h">
+  <h2 id="exp-h">Experience</h2>
+  <ol class="tl">
+    {exp.map(e => (
+      <li class="item">
+        <p class="time">{e.time}</p>
+        <h3>{e.title}</h3>
+        <p class="org">{e.org}</p>
+        <ul>{e.points.map(p => <li set:html={fmt(p)} />)}</ul>
+      </li>
+    ))}
+  </ol>
+</section>
+<style>
+  .sec { padding-block: 3rem; }
+  .tl { list-style: none; margin: 0; padding: 0; }
+  .item { padding: 0 0 2rem 1.25rem; border-left: 2px solid var(--color-line); position: relative; }
+  .item::before { content: ''; position: absolute; left: -6px; top: .35rem; width: 10px; height: 10px; border-radius: 50%; background: var(--color-accent); }
+  .item p { margin: 0; }
+  .time { font: 500 .8rem/1.3 var(--font-mono); color: var(--color-accent-text); }
+  h3 { margin: .35rem 0 .2rem; }
+  .org { font: 400 .85rem/1.5 var(--font-mono); color: var(--color-muted); margin-bottom: .75rem !important; }
+  ul { margin: 0; padding-left: 1.1rem; max-width: 68ch; }
+  ul li { margin-bottom: .5rem; }
+</style>

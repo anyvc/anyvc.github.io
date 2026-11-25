@@ -1,0 +1,24 @@
+---
+import site from '../../data/site.json';
+const { contact } = site;
+---
+<section id="contact" class="w-wrap sec" aria-labelledby="contact-h">
+  <h2 id="contact-h">{contact.title}</h2>
+  <p class="lead">{contact.text}</p>
+  <ul class="links">
+    {contact.links.map(l => (
+      <li><a class="w-card link" href={l.href} download={l.download ? '' : undefined} target={l.href.startsWith('http') ? '_blank' : undefined} rel={l.href.startsWith('http') ? 'noopener' : undefined}>
+        <span class="k">{l.label}</span><span class="v">{l.text}</span>
+      </a></li>
+    ))}
+  </ul>
+</section>
+<style>
+  .sec { padding-block: 3rem 4rem; }
+  .lead { font-size: 1.15rem; }
+  .links { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }
+  .link { display: flex; flex-direction: column; gap: .35rem; height: 100%; text-decoration: none; color: var(--color-text); }
+  .link:hover, .link:focus-visible { box-shadow: 0 0 0 1px var(--color-accent-text); }
+  .k { font: 500 .75rem/1 var(--font-mono); color: var(--color-muted); }
+  .v { font: 600 1rem/1.35 var(--font-mono); overflow-wrap: anywhere; color: var(--color-accent-text); }
+</style>

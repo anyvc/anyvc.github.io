@@ -11,6 +11,7 @@ export const clean: Tokens = {
     mono: "'JetBrains Mono', ui-monospace, monospace",
     displayWeight: '800', numWeight: '800',
   },
+  status: { d: '#1D4ED8', m: '#B42318', f: '#B45309', n: '#5C5A54', eyeFill: '#EAF0FE', slash: '#1C1B18' },
   shape: {
     radius: '8px',
     cardBorder: '1px solid #DCD9D0',

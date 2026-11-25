@@ -1,0 +1,19 @@
+---
+// Status icons: d open eye, m slashed eye, f crossed eye, n dashed outline. Shape carries the meaning, color only reinforces it.
+const { status, label = '', decorative = false } = Astro.props;
+const E = 'M2 20Q40-2 78 20Q40 42 2 20Z';
+const c = `var(--status-${status})`;
+---
+<svg class="eye" viewBox="0 0 80 40" focusable="false" role={decorative ? undefined : 'img'} aria-label={decorative ? undefined : label} aria-hidden={decorative ? 'true' : undefined}>
+  {status === 'n'
+    ? <path d={E} fill="none" stroke={c} stroke-width="2" stroke-dasharray="3 3" />
+    : <>
+        <path d={E} fill={status === 'f' ? 'none' : 'var(--status-eye-fill)'} stroke={c} stroke-width="2" />
+        {status !== 'f' && <><circle cx="40" cy="20" r="11" fill={c} /><circle cx="40" cy="20" r="4.5" fill="var(--color-bg)" /></>}
+        {status === 'm' && <path d="M10 36L70 4" stroke="var(--status-slash)" stroke-width="3" />}
+        {status === 'f' && <path d="M26 8l28 24M54 8L26 32" stroke={c} stroke-width="3" />}
+      </>}
+</svg>
+<style>
+  .eye { display: block; width: 3.25rem; height: auto; }
+</style>

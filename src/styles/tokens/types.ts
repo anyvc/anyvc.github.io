@@ -8,5 +8,6 @@ export type Tokens = {
     tint: string;
   };
   font: { display: string; body: string; mono: string; displayWeight: string; numWeight: string };
+  status: { d: string; m: string; f: string; n: string; eyeFill: string; slash: string }; // coverage eye icons: graphics need >= 3:1 on surface
   shape: { radius: string; cardBorder: string; cardTop: string; cardBg: string; numSize: string; numColor: string };
 };

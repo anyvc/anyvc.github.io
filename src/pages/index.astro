@@ -4,17 +4,20 @@ import Hero from '../components/home/Hero.astro';
 import Marquee from '../components/home/Marquee.astro';
 import Highlights from '../components/home/Highlights.astro';
 import CaseGrid from '../components/home/CaseGrid.astro';
-const stubs = [['coverage', 'Detection coverage', 5], ['about', 'About', 6], ['experience', 'Experience', 6], ['gallery', 'Gallery', 6], ['contact', 'Contact', 6]];
+import Coverage from '../components/home/Coverage.astro';
+import About from '../components/home/About.astro';
+import Experience from '../components/home/Experience.astro';
+import Gallery from '../components/home/Gallery.astro';
+import Contact from '../components/home/Contact.astro';
 ---
 <Base>
   <Hero />
   <Marquee />
   <Highlights />
   <CaseGrid />
-  {/* Temporary anchors so nav and hero links resolve until their stages replace them. Delete each stub as its stage lands. */}
-  {stubs.map(([id, name, stage]) => (
-    <section id={id as string} data-stub class="w-wrap" style="padding-block:2.5rem">
-      <h2>{name}</h2><p class="w-mono">Stage {stage}</p>
-    </section>
-  ))}
+  <Coverage />
+  <About />
+  <Experience />
+  <Gallery />
+  <Contact />
 </Base>
